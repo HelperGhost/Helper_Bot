@@ -22,12 +22,12 @@ async def on_ready():
 #     member_role = discord.utils.get(member.guild.roles, name = member_role_name)
 #     if not member_role:
 #         member_role = member.guild.create_role(name = member_role_name)
-#     role_given_channel = member.guild.get_channel(1154326721584181329)
+#     role_given_channel = member.guild.get_channel()
 #     if role_given_channel:
 #         role_given_message = f"Gave {member.name} the {member_role_name} role."
 #         await role_given_channel.send(role_given_message)
 
-#     general_channel = member.guild.get_channel(1154323890273779724)
+#     general_channel = member.guild.get_channel()
 #     if general_channel:
 #         general_welcome_message = f"Welcome to the server, {member.mention}!"
 #         await general_channel.send(general_welcome_message)
@@ -39,7 +39,7 @@ async def ping(ctx):
 
 @bot.event
 async def on_message(message):
-    if message.channel.id == 1155068665818001448:
+    if message.channel.id == "Your_Channel_ID":
         emoji = '\U0001F64B\u200D\u2640\uFE0F'
         await message.add_reaction(emoji)
 
@@ -71,4 +71,4 @@ async def unmute(ctx, member: discord.Member):
         await ctx.send(f"{member.name} is not muted.")
 
 # Replace 'YOUR_BOT_TOKEN' with your bot token
-bot.run('MTE1NTQ2NjYxOTExNjYwMTQwNg.GXpwL_.vbwHi3c1bVrwbmjeSpAwpro9qQD-aaEgyBtHoY')
+bot.run('YOUR_BOT_TOKEN')
