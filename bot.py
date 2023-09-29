@@ -50,7 +50,7 @@ async def ban(ctx, member: discord.Member, *, reason="No reason provided"):
         await ctx.respond("I don't have permission to ban members.")
     except discord.HTTPException:
         await ctx.respond("An error occured while processing the ban command.")
-
+# Timeout does not works.
 @Helper.command(name="mute", descrition="to timeout any member in the server for minutes")
 @commands.has_permissions(timeout_member=True)
 async def mute(ctx, member: discord.Member, time: int = 0, *, reason: str ="No reason provided"):
