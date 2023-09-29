@@ -1,154 +1,66 @@
+# Imoprt the following libraries to make the bot.
 import discord
 from discord.ext import commands
-import asyncio
+import os
+import datetime
+import dotenv
 
-# Define your intents
-intents = discord.Intents.default()
-intents.message_content = True  # Enable message content intent
-intents.presences = True       # Enable presence intent
+dotenv.load_dotenv()
+token = str(os.getenv("TOKEN"))
+Helper = discord.Bot()
 
-# Initialize the bot with intents
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot_info = '''
+👻 Name: Helper#8515
+👻 Nickname: Helper
+👻 Age: I am a ghost, I don't have an age. I am beyond the realm of the living, bro.
+👻 Gender: Ghost
+👻 Nationality: Ghost UK (Boo-rish)
+👻 Hobbies: Haunting Discord servers 👻👾
+👻 Likes: ☕ Coffee and 🎶 Music
+👻 Dislikes: Scammers 🚫
 
-# Replace 'YOUR_BOT_TOKEN' with your bot token
-bot_token = 'Your_Bot_Token'
+👻 Description:
+Hey there, mortal souls! 👋 This is my discord bot, Helper#8515, here to assist and haunt in equal measure! 👻✨ Crafted by the ethereal being known as no_gaming_01, with a massive spectral contribution from .wuid. Together, we're here to make your Discord experience otherworldly! 💀👻👾
+'''
 
-# Define the name of the roles
-muted_role_name = "Muted"
-member_role_name = "Member"
-
-@bot.event
+@Helper.event
 async def on_ready():
-    print(f'Logged in as {bot.user.name}')
-    await bot.add_cog(ModerationCog(bot))
+    print(f"Logged in as {Helper.user}.")
 
-@bot.event
+@Helper.event
 async def on_member_join(member):
-    member_role = discord.utils.get(member.guild.roles, name=member_role_name)
+    await member.send(f"Welcome to the server, {member.mention}!")
 
-    if not member_role:
-        member_role = await member.guild.create_role(name=member_role_name)
-
-    # Add the member role to the new member before sending the message
-    await member.add_roles(member_role)
-
-    general_channel = member.guild.get_channel('Your_Channel_ID')  # Replace with the actual channel ID
-    await general_channel.send(f"Welcome to the server, {member.mention}!")
-
-@bot.command()
+@Helper.command(name="ping", description="tells the latency of the bot.")
 async def ping(ctx):
-    latency = round(bot.latency * 1000)
-    await ctx.send(f'Pong! You have a ping of {latency}ms.')
+    latency = round(Helper.latency * 1000)
+    await ctx.respond(f"Pong! I got a ping of {latency}ms.")
 
-@bot.event
-async def on_message(message):
-    # Replace with the actual channel ID where you want to add reactions
-    if message.channel.id == 'Your_Channel_ID':
-        emoji = 'Emoji'  # Replace with the desired emoji
-        await message.add_reaction(emoji)
+@Helper.command(name="botinfo", description="tells the bot's info.")
+async def botinfo(ctx):
+    await ctx.respond(bot_info)
 
-    await bot.process_commands(message)
+@Helper.command(name="ban", description="to ban any member in the server")
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, member: discord.Member, *, reason="No reason provided"):
+    try:
+        await member.ban()
+        await ctx.respond(f'{member.mention} has been banned. Reason: {reason}.')
+    except discord.Forbidden:
+        await ctx.respond("I don't have permission to ban members.")
+    except discord.HTTPException:
+        await ctx.respond("An error occured while processing the ban command.")
 
-class ModerationCog(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+@Helper.command(name="mute", descrition="to timeout any member in the server for minutes")
+@commands.has_permissions(timeout_member=True)
+async def mute(ctx, member: discord.Member, time: int = 0, *, reason: str ="No reason provided"):
+    duration = datetime.timedelta(minutes=time)
+    try:
+        await member.timeout(time, reason)
+        await ctx.respond(f'{member.mention} has been timedout. reason: {reason}.')
+    except discord.Forbidden:
+        await ctx.respond("I don't have permission to timeout members.")
+    except discord.HTTPException:
+        await ctx.respond("An error occured while processing the timeout command.")
 
-    @commands.command()
-    @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, *, reason="No reason provided."):
-        try:
-            await member.ban(reason=reason)
-            await ctx.send(f"{member.name} has been banned. Reason: {reason}")
-        except discord.Forbidden:
-            await ctx.send("I don't have permission to ban members.")
-        except discord.HTTPException:
-            await ctx.send("An error occurred while processing the ban command.")
-    
-    @ban.error
-    async def ban_error(self, ctx, error):
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send("You don't have permission to use this command.")
-        if isinstance(error, commands.BadArgument):
-            await ctx.send("Member not found or invalid arguments provided.")
-
-    @commands.command()
-    @commands.has_permissions(manage_roles=True)
-    async def mute(self, ctx, member: discord.Member, duration: int, *, reason="No reason provided."):
-        muted_role = discord.utils.get(ctx.guild.roles, name=muted_role_name)
-        if not muted_role:
-            muted_role = await ctx.guild.create_role(name=muted_role_name)
-        try:
-            await member.add_roles(muted_role)
-            await ctx.send(f"{member.name} has been muted for {duration} minutes. Reason: {reason}")
-
-            await asyncio.sleep(duration * 60)
-
-            await member.remove_roles(muted_role)
-            await ctx.send(f"{member.name} has been unmuted after {duration} minutes.")
-        except discord.Forbidden:
-            await ctx.send("I don't have permission to manage roles.")
-        except discord.HTTPException:
-            await ctx.send("An error occurred while processing the mute/unmute command.")
-
-    @mute.error
-    async def mute_error(self, ctx, error):
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send("You don't have permission to use this command.")
-        if isinstance(error, commands.BadArgument):
-            await ctx.send("Member not found or invalid arguments provided.")
-
-    @commands.command()
-    @commands.has_permissions(ban_members=True)
-    async def unban(self, ctx, *, user_id):
-        try:
-            banned_users = await ctx.guild.bans()
-            for ban_entry in banned_users:
-                user = ban_entry.user
-                if str(ban_entry.user.id) == str(user_id):
-                    await ctx.guild.unban(ban_entry.user)
-                    await ctx.send(f"{ban_entry.user.name} has been unbanned.")
-                    return
-            await ctx.send("Member not found in the list of banned users.")
-        except discord.Forbidden:
-            await ctx.send("I don't have permission to unban members.")
-        except discord.HTTPException:
-            await ctx.send("An error occurred while processing the unban command.")
-
-    @unban.error
-    async def unban_error(self, ctx, error):
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send("You don't have permission to use this command.")
-        if isinstance(error, commands.BadArgument):
-            await ctx.send("Member not found or invalid arguments provided.")
-
-    @commands.command()
-    @commands.has_permissions(manage_roles=True)
-    async def unmute(self, ctx, member: discord.Member):
-        muted_role = discord.utils.get(ctx.guild.roles, name=muted_role_name)
-        if not muted_role:
-            await ctx.send(f"The {muted_role_name} role doesn't exist.")
-            return
-
-        try:
-            if muted_role in member.roles:
-                await member.remove_roles(muted_role)
-                await ctx.send(f"{member.name} has been unmuted.")
-            else:
-                await ctx.send(f"{member.name} is not muted.")
-        except discord.Forbidden:
-            await ctx.send("I don't have permission to manage roles.")
-        except discord.HTTPException:
-            await ctx.send("An error occurred while processing the unmute command.")
-
-    # Error handler for the unmute command
-    @unmute.error
-    async def unmute_error(self, ctx, error):
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send("You don't have permission to use this command.")
-        if isinstance(error, commands.BadArgument):
-            await ctx.send("Member not found or invalid arguments provided.") 
-    
-# bot.add_cog(ModerationCog(bot))
-
-# Run the bot
-bot.run(bot_token)
+Helper.run(token)
