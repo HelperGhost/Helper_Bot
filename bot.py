@@ -4,6 +4,7 @@ from discord.ext import commands
 import os # import os for the import token from .env file
 import datetime # import datetime to have a track of the time for mute and ban
 import dotenv # import .env to to use your token
+import asyncio
 
 dotenv.load_dotenv() # now load the .evn file
 token = str(os.getenv("TOKEN")) # now import your token
@@ -23,6 +24,7 @@ bot_info = '''
 👻 Description:
 Hey there, mortal souls! 👋 This is my discord bot, Helper#8515, here to assist and haunt in equal measure! 👻✨ Crafted by the ethereal being known as no_gaming_01, with a massive spectral contribution from .wuid. Together, we're here to make your Discord experience otherworldly! 💀👻👾
 '''
+muted_role_name = "Muted"
 
 # This prints in terminal that the bot is online
 @Helper.event
@@ -64,5 +66,26 @@ async def timeout(ctx, member: discord.Member, time: int = 0, *, reason: str ="N
     duration = datetime.datetime.utcnow() + datetime.timedelta(minutes=time)
     await member.timeout(duration, reason=reason)
     await ctx.respond(f'{member.mention} has been timed out. reason: {reason}.')
+
+@Helper.command(name="mute", description="to mute a member in discord server")
+@commands.has_permissions(manage_roles=True)
+async def mute(ctx, member: discord.Member, time: int = 10, reason: str ="No reason provided"):
+    muted_role = discord.utils.get(ctx.guild.roles, name=muted_role_name)
+    duration = time * 60
+    try:
+        if not muted_role:
+            muted_role = ctx.guild.create_role(name=muted_role_name)
+        
+        await member.add_roles(muted_role, reason=reason)
+        await ctx.respond(f'{member.name} has been muted for {time} minutes. Reason: {reason}')
+
+        await asyncio.sleep(duration)
+
+        await member.remove_roles(muted_role)
+        await ctx.respond(f'{member.mention} has been unmuted after {time} minutes.')
+    except discord.Forbidden:
+        await ctx.respond("I don't have permission to mute members.") # Bot will respond this if it does not have the permissions
+    except discord.HTTPException:
+        await ctx.respond("An error occured while processing the mute command.") # Bot will respond this if there is an error while connecting to discord
     
 Helper.run(token)
