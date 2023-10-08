@@ -59,14 +59,15 @@ async def ban(ctx, member: discord.Member, *, reason="No reason provided"):
     except discord.HTTPException:
         await ctx.respond("An error occured while processing the ban command.") # Bot will respond this if there is an error while connecting to discord
 
-# Timeout command now works
+# This is the command to timeout people int the server
 @Helper.command(name="timeout", descrition="to timeout a member in the server")
 @commands.has_permissions(kick_members=True)
 async def timeout(ctx, member: discord.Member, time: int = 0, *, reason: str ="No reason provided"):
-    duration = datetime.datetime.utcnow() + datetime.timedelta(minutes=time)
-    await member.timeout(duration, reason=reason)
+    duration = datetime.datetime.utcnow() + datetime.timedelta(minutes=time) # Define the time for timeout
+    await member.timeout(duration, reason=reason) # Set the time and reason
     await ctx.respond(f'{member.mention} has been timed out. reason: {reason}.')
 
+# This is the command to mute people in the server
 @Helper.command(name="mute", description="to mute a member in discord server")
 @commands.has_permissions(manage_roles=True)
 async def mute(ctx, member: discord.Member, time: int = 10, reason: str ="No reason provided"):
