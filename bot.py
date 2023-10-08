@@ -88,5 +88,26 @@ async def mute(ctx, member: discord.Member, time: int = 10, reason: str ="No rea
         await ctx.respond("I don't have permission to mute members.") # Bot will respond this if it does not have the permissions
     except discord.HTTPException:
         await ctx.respond("An error occured while processing the mute command.") # Bot will respond this if there is an error while connecting to discord
-    
+
+# This is the command to unmute people in the server
+@Helper.command(name="unmute", description="to unmute a member in discord server.")
+@commands.has_permissions(manage_roles=True)
+async def unmute(ctx, member: discord.Member, *, reason: str = "No reason provided"):
+    muted_role = discord.utils.get(ctx.guild.roles, name=muted_role_name)
+    try:
+        if not muted_role:
+            await ctx.respond("The Muted role doesn't exist.")
+            return
+        
+        if muted_role not in member.roles:
+            ctx.respond(f'{member.name} is not muted.')
+            return
+        
+        await member.remove_roles(muted_role)
+        await ctx.respond(f'{member.mention} has been unmuted. Reason: {reason}.')
+    except discord.Forbidden:
+        await ctx.respond("I don't have permission to unmute members.") # Bot will respond this if it does not have the permissions
+    except discord.HTTPException:
+        await ctx.respond("An error occured while processing the unmute command.") # Bot will respond this if there is an error while connecting to discord
+
 Helper.run(token)
