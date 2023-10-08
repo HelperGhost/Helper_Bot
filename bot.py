@@ -110,4 +110,16 @@ async def unmute(ctx, member: discord.Member, *, reason: str = "No reason provid
     except discord.HTTPException:
         await ctx.respond("An error occured while processing the unmute command.") # Bot will respond this if there is an error while connecting to discord
 
+# This is the command to kick people in the server
+@Helper.command(name="kick", description="to kick a member in the discord server.")
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, member: discord.Member, *, reason: str = "No reason provided"):
+    try:
+        await member.kick(reason=reason)
+        await ctx.respond(f'<@{member.id}> has been kicked from the server. Reason: {reason}.')
+    except discord.Forbidden:
+        await ctx.respond("I don't have permission to kick members.") # Bot will respond this if it does not have the permissions
+    except discord.HTTPException:
+        await ctx.respond("An error occured while processing the kick command.") # Bot will respond this if there is an error while connecting to discord
+
 Helper.run(token)
