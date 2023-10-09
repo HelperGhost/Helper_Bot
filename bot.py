@@ -30,17 +30,6 @@ Hey there, mortal souls! 👋 This is my discord bot, Helper#8515, here to assis
 async def on_member_join(member: discord.Member):
     await member.send(f"Welcome to the server, {member.mention}!")
 
-# This is the command to show the latency of the bot
-@Helper.slash_command(name="ping", description="tells the latency of the bot.")
-async def ping(ctx):
-    latency = round(Helper.latency * 1000) # This rounds the latency and convert it into ms
-    await ctx.respond(f"Pong! I got a ping of {latency}ms.")
-
-#This is for the information about the bot
-@Helper.slash_command(name="botinfo", description="tells the bot's info.")
-async def botinfo(ctx):
-    await ctx.respond(bot_info)
-
 # This prints in terminal that the bot is online
 @Helper.event
 async def on_ready():
