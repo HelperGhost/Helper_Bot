@@ -10,25 +10,17 @@ dotenv.load_dotenv() # now load the .evn file
 token = str(os.getenv("TOKEN")) # now import your token
 Helper = commands.Bot()
 
-# This is the place for all variables I have
-bot_info = '''
-👻 Name: Helper#8515
-👻 Nickname: Helper
-👻 Age: I am a ghost, I don't have an age. I am beyond the realm of the living, bro.
-👻 Gender: Ghost
-👻 Nationality: Ghost UK (Boo-rish)
-👻 Hobbies: Haunting Discord servers 👻👾
-👻 Likes: ☕ Coffee and 🎶 Music
-👻 Dislikes: Scammers 🚫
-
-👻 Description:
-Hey there, mortal souls! 👋 This is my discord bot, Helper#8515, here to assist and haunt in equal measure! 👻✨ Crafted by the ethereal being known as no_gaming_01, with a massive spectral contribution from .wuid. Together, we're here to make your Discord experience otherworldly! 💀👻👾
-'''
-
-# Welcome message is not working
 @Helper.event
-async def on_member_join(member: discord.Member):
-    await member.send(f"Welcome to the server, {member.mention}!")
+async def on_message(message):
+    introduction_channel = 1155068665818001448
+    if message.channel.id == introduction_channel:
+        await message.add_reaction('🙋‍♀️')
+    polls_channel = 1161280893877497886
+    if message.channel.id == polls_channel:
+        await message.add_reaction('👍')
+        await message.add_reaction('👎')
+
+    await Helper.process_commands(message)
 
 # This prints in terminal that the bot is online
 @Helper.event
