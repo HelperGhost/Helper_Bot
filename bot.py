@@ -42,6 +42,7 @@ def load_cogs():
             cog = filename[:-3]  # Remove the '.py' extension
             try:
                 Helper.load_extension(f'Cogs.{cog}')
+                print(f'{cog} has been loaded')
             except Exception as e:
                 print(f"Error loading extension '{cog}': {e}")
 
