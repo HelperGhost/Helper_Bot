@@ -22,6 +22,17 @@ async def on_message(message):
 
     await Helper.process_commands(message)
 
+@Helper.event
+async def on_member_join(member):
+    mem = 1154350344315338792
+    await member.add_role(mem)
+    print("DEBUG: Auto Role Stage 1 Passed.")
+    chnl = 1154326721584181329
+    c = Helper.get_channel(chnl)
+    print("DEBUG: Auto Role Stage 2 Passed") # Remove These When Confirmed they work.
+    await c.send(f"{member.mention} Got Member Role!")
+
+
 # This prints in terminal that the bot is online
 @Helper.event
 async def on_ready():
