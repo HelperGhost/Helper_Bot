@@ -50,6 +50,17 @@ class Moderation(commands.Cog):
         except discord.HTTPException:
             await ctx.respond("An error occured while processing the mute command.") # Bot will respond this if there is an error while connecting to discord
 
+    @commands.slash_command(name="unban", description="to unban a member.")
+    @commands.has_permissions(ban_members=True)
+    async def unban(self, ctx, member: discord.User, *, reason: str = "No reason provided"):
+        try:
+            await ctx.guild.unban(user=member)
+            await ctx.respond(f'<@{member.id}> has been unbanned. Reason: {reason}.')
+        except discord.Forbidden:
+            await ctx.respond("I don't have permission to unban members.") # Bot will respond this if it does not have the permissions
+        except discord.HTTPException:
+            await ctx.respond("An error occured while processing the unban command.") # Bot will respond this if there is an error while connecting to discord
+
     @commands.slash_command(name="unmute", description="to unmute a member in discord server.")
     @commands.has_permissions(manage_roles=True)
     async def unmute(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
