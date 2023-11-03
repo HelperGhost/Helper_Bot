@@ -14,7 +14,7 @@ Helper = commands.Bot(intents=intents)
 # This prints in terminal that the bot is online
 @Helper.event
 async def on_ready():
-    await Helper.change_presence(status=discord.Status.online, activity=discord.Streaming("Scammer Finder"))
+    await Helper.change_presence(status=discord.Status.online, activity=discord.Game("Scammer Finder"))
     print(f"Logged in as {Helper.user}.")
 
 @Helper.event
