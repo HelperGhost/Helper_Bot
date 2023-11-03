@@ -22,7 +22,10 @@ class User_Info(commands.Cog):
         # discord joined data
         server_joined_at = member.joined_at
         server_age = now - server_joined_at
-        server_join_date = member.created_at.strftime("%A, %B %d, %Y %H:%M UTC ")
+        server_join_date = member.joined_at.strftime("%A, %B %d, %Y %H:%M UTC ")
+
+        if server_age == -1:
+            server_age = 0
 
         roles = sorted(member.roles, key=lambda role: role.position, reverse=True)
         role = ", ".join(f"{role.mention}" for role in roles if role.name != '@everyone')
@@ -30,15 +33,17 @@ class User_Info(commands.Cog):
         embed = discord.Embed(
         title="",
         description="",
-        color= member.color  # You can customize the color here
+        color= member.color,  # You can customize the color here
+        timestamp = datetime.datetime.utcnow()
         )
+        
         embed.set_author(name=f"@{member.name}", icon_url=f"{member.avatar}")
         embed.set_thumbnail(url=f"{member.avatar}")
 
-        embed.add_field(name="**User Info**", value=f"ID: {member.id}\nName: @{member.name}", inline=False)
-        embed.add_field(name="**Discord Joined**", value=f"{discord_join_date} ({account_age.days} days)", inline=False)
-        embed.add_field(name="**Server Joined**", value=f"{server_join_date} ({server_age.days} days)", inline=False)
-        embed.add_field(name="**User's Roles**", value=f"{role}", inline=False)
+        embed.add_field(name="**User Info:**", value=f"ID: {member.id}\nName: {member.mention}", inline=False)
+        embed.add_field(name="**Discord Joined:**", value=f"{discord_join_date} ({account_age.days} days)", inline=False)
+        embed.add_field(name="**Server Joined:**", value=f"{server_join_date} ({server_age.days} days)", inline=False)
+        embed.add_field(name="**User's Roles:**", value=f"{role}", inline=False)
 
         await ctx.respond(embed=embed)
 
