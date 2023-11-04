@@ -90,6 +90,21 @@ class Server_info(commands.Cog):
 
         await ctx.respond(embed=embed)
 
+    @commands.slash_command(name="servericon", description="provides the server icon")
+    async def servericon(self, ctx):
+
+        embed = discord.Embed(
+            title = "",
+            description = "",
+            color = ctx.guild.owner.color,
+            timestamp = datetime.datetime.utcnow()
+        )
+
+        embed.set_author(name=f"{ctx.guild.name}", icon_url=f"{ctx.guild.icon}")
+        embed.set_image(url=f"{ctx.guild.icon}")
+
+        await ctx.respond(embed=embed)
+
 def setup(Helper):
     Helper.add_cog(User_Info(Helper))
     Helper.add_cog(Server_info(Helper))
