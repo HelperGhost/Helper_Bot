@@ -58,6 +58,38 @@ class User_Info(commands.Cog):
         embed.set_image(url=f"{member.avatar}")
 
         await ctx.respond(embed=embed)
+class Server_info(commands.Cog):
+    def __init__(self, Helper):
+        self.helper: commands.Bot = Helper
+
+    @commands.slash_command(name="serverinfo", description="tells the information about the server")
+    async def serverinfo(self, ctx):
+
+        server_created_at = ctx.guild.created_at
+
+        roles = sorted(ctx.guild.roles, key=lambda role: role.position, reverse=True)
+        role = ", ".join(f"{ctx.guild.roles}" for role in roles if role.name != '@everyone')
+
+        embed = discord.Embed(
+            title = "Under Development!",
+            description = "",
+            color = ctx.guild.owner.color,
+            timestamp = datetime.datetime.utcnow()
+        )
+
+        embed.set_author(name=f'{ctx.guild.name}', icon_url=f'{ctx.guild.icon}')
+        embed.set_thumbnail(url=f'{ctx.guild.icon}')
+
+        embed.add_field(name="**Owner:**", value=f'{ctx.guild.owner.mention}')
+        embed.add_field(name="**Members:**", value=len(ctx.guild.members))
+        embed.add_field(name="**Roles:**", value=len(ctx.guild.roles))
+        embed.add_field(name="**Categories:**", value=len(ctx.guild.categories))
+        embed.add_field(name="**Channels:**", value=len(ctx.guild.channels))
+        embed.add_field(name="**Text Channels:**", value=len(ctx.guild.text_channels))
+        embed.add_field(name="**Voice Channels:**", value=len(ctx.guild.voice_channels))
+
+        await ctx.respond(embed=embed)
 
 def setup(Helper):
     Helper.add_cog(User_Info(Helper))
+    Helper.add_cog(Server_info(Helper))
