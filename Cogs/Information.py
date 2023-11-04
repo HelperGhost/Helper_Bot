@@ -47,5 +47,22 @@ class User_Info(commands.Cog):
 
         await ctx.respond(embed=embed)
 
+    @commands.slash_command(name="avatar", description="shows avatar of a member")
+    async def avatar(self, ctx, *, member: discord.Member = None):
+        if member is None:
+            member = ctx.author
+
+        embed = discord.Embed(
+            title="",
+            description="",
+            color= member.color,  # You can customize the color here
+            timestamp = datetime.datetime.utcnow()
+        )
+
+        embed.set_author(name=f"@{member.name}", icon_url=f"{member.avatar}")
+        embed.set_image(url=f"{member.avatar}")
+
+        await ctx.respond(embed=embed)
+
 def setup(Helper):
     Helper.add_cog(User_Info(Helper))
