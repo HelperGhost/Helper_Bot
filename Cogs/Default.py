@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import bridge, commands
 import random
 
 bot_info = '''
@@ -17,20 +17,20 @@ Hey there, mortal souls! 👋 This is my discord bot, Helper#8515, here to assis
 '''
 class Default(commands.Cog):
     def __init__(self, bot):
-        self.bot: commands.bot = bot
+        self.bot = bot
 
     # This is the command to show the latency of the bot
-    @commands.slash_command(name="ping", description="tells the latency of the bot.")
+    @bridge.bridge_command(name="ping", description="tells the latency of the bot.")
     async def ping(self, ctx):
         latency = round(self.bot.latency * 1000) # This rounds the latency and convert it into ms
         await ctx.respond(f"Pong! I got a ping of {latency}ms.")
 
     #This is for the information about the bot
-    @commands.slash_command(name="botinfo", description="tells the bot's info.")
+    @bridge.bridge_command(name="botinfo", description="tells the bot's info.")
     async def botinfo(self, ctx):
         await ctx.respond(bot_info)
 
-    @commands.slash_command(name="roast", description="roast someone for you")
+    @bridge.bridge_command(name="roast", description="roast someone for you")
     async def roast(self, ctx, member: discord.Member):
         skele_id = 875208986603958344
         mom_jokes = [

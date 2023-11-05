@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import bridge, commands
 import datetime
 import asyncio
 
@@ -10,7 +10,7 @@ class Moderation(commands.Cog):
         self.bot = bot
 
     # This is the command to ban people in the server
-    @commands.slash_command(name="ban", description="to ban any member in the server")
+    @bridge.bridge_command(name="ban", description="to ban any member in the server")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason="No reason provided"):
         try:
@@ -22,14 +22,14 @@ class Moderation(commands.Cog):
             await ctx.respond("An error occured while processing the ban command.") # Bot will respond this if there is an error while connecting to discord
 
     # Timeout command now works
-    @commands.slash_command(name="timeout", description="to timeout a member in the server")
+    @bridge.bridge_command(name="timeout", description="to timeout a member in the server")
     @commands.has_permissions(kick_members=True)
     async def timeout(self, ctx, member: discord.Member, time: int = 10, *, reason: str ="No reason provided"):
         duration = datetime.datetime.utcnow() + datetime.timedelta(minutes=time)
         await member.timeout(duration, reason=reason)
         await ctx.respond(f'{member.mention} has been timed out. reason: {reason}.')
 
-    @commands.slash_command(name="mute", description="to mute a member in discord server")
+    @bridge.bridge_command(name="mute", description="to mute a member in discord server")
     @commands.has_permissions(manage_roles=True)
     async def mute(self, ctx, member: discord.Member, time: int = 10, reason: str ="No reason provided"):
         muted_role = discord.utils.get(ctx.guild.roles, name=muted_role_name)
@@ -50,7 +50,7 @@ class Moderation(commands.Cog):
         except discord.HTTPException:
             await ctx.respond("An error occured while processing the mute command.") # Bot will respond this if there is an error while connecting to discord
 
-    @commands.slash_command(name="unban", description="to unban a member.")
+    @bridge.bridge_command(name="unban", description="to unban a member.")
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, member: discord.User, *, reason: str = "No reason provided"):
         try:
@@ -61,7 +61,7 @@ class Moderation(commands.Cog):
         except discord.HTTPException:
             await ctx.respond("An error occured while processing the unban command.") # Bot will respond this if there is an error while connecting to discord
 
-    @commands.slash_command(name="unmute", description="to unmute a member in discord server.")
+    @bridge.bridge_command(name="unmute", description="to unmute a member in discord server.")
     @commands.has_permissions(manage_roles=True)
     async def unmute(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
         muted_role = discord.utils.get(ctx.guild.roles, name=muted_role_name)
@@ -81,7 +81,7 @@ class Moderation(commands.Cog):
         except discord.HTTPException:
             await ctx.respond("An error occured while processing the unmute command.") # Bot will respond this if there is an error while connecting to discord
 
-    @commands.slash_command(name="kick", description="to kick a member in the discord server.")
+    @bridge.bridge_command(name="kick", description="to kick a member in the discord server.")
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
         try:

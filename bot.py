@@ -1,28 +1,27 @@
 # Imoprt the following libraries to make the bot.
 import discord 
-from discord.ext import commands
+from discord.ext import bridge
 import os # import os for the import token from .env file
 import dotenv # import .env to to use your token
 
-intents = discord.Intents.default()
-intents.members = True
+intents = discord.Intents.all()
 
 dotenv.load_dotenv() # now load the .evn file
 token = str(os.getenv("TOKEN")) # now import your token
-Helper = commands.Bot(intents=intents)
+Helper = bridge.Bot(command_prefix="!", intents=intents)
 
 # This prints in terminal that the bot is online
 @Helper.event
 async def on_ready():
-    await Helper.change_presence(status=discord.Status.online, activity=discord.Game("Scammer Finder"))
+    await Helper.change_presence(status=discord.Status.online, activity=discord.Game("Minecraft!"))
     print(f"Logged in as {Helper.user}.")
 
 @Helper.event
 async def on_message(message):
-    introduction_channel = 1155068665818001448
+    introduction_channel = 1234567890 # Your introduction channel id
     if message.channel.id == introduction_channel:
         await message.add_reaction('🙋‍♀️')
-    polls_channel = 1161280893877497886
+    polls_channel = 1234567890 # Your polls channel id
     if message.channel.id == polls_channel:
         await message.add_reaction('👍')
         await message.add_reaction('👎')
@@ -30,14 +29,10 @@ async def on_message(message):
     await Helper.process_commands(message)
 
 @Helper.event
-async def on_member_join(member):
-    mem = 1154350344315338792
-    await member.add_role(mem)
-    print("DEBUG: Auto Role Stage 1 Passed.")
-    chnl = 1154326721584181329
-    c = Helper.get_channel(chnl)
-    print("DEBUG: Auto Role Stage 2 Passed") # Remove These When Confirmed they work.
-    await c.send(f"{member.mention} Got Member Role!")
+async def on_member_join(ctx):
+    member_role_name = "Member"
+    member_role = discord.utils.get(ctx.guild.roles, name=member_role_name)
+    await ctx.add_roles(member_role)
 
 # Define a function to load cogs from the 'Cogs' directory
 def load_cogs():

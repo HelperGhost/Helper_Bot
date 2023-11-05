@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import bridge, commands
 import datetime
 
 # Now time
@@ -7,9 +7,9 @@ now = datetime.datetime.now(datetime.timezone.utc)
 
 class User_Info(commands.Cog):
     def __init__(self, Helper):
-        self.helper: commands.Bot = Helper
+        self.helper = Helper
 
-    @commands.slash_command(name="userinfo", description="tells the information about the user")
+    @bridge.bridge_command(name="userinfo", description="tells the information about the user")
     async def userinfo(self, ctx, member: discord.Member = None):
         if member is None:
             member = ctx.author
@@ -42,7 +42,7 @@ class User_Info(commands.Cog):
 
         await ctx.respond(embed=embed)
 
-    @commands.slash_command(name="avatar", description="shows avatar of a member")
+    @bridge.bridge_command(name="avatar", description="shows avatar of a member")
     async def avatar(self, ctx, *, member: discord.Member = None):
         if member is None:
             member = ctx.author
@@ -58,11 +58,12 @@ class User_Info(commands.Cog):
         embed.set_image(url=f"{member.avatar}")
 
         await ctx.respond(embed=embed)
+
 class Server_info(commands.Cog):
     def __init__(self, Helper):
         self.helper: commands.Bot = Helper
 
-    @commands.slash_command(name="serverinfo", description="tells the information about the server")
+    @bridge.bridge_command(name="serverinfo", description="tells the information about the server")
     async def serverinfo(self, ctx):
 
         server_created_at = ctx.guild.created_at
@@ -90,7 +91,7 @@ class Server_info(commands.Cog):
 
         await ctx.respond(embed=embed)
 
-    @commands.slash_command(name="servericon", description="provides the server icon")
+    @bridge.bridge_command(name="servericon", description="provides the server icon")
     async def servericon(self, ctx):
 
         embed = discord.Embed(
