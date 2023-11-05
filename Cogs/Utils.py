@@ -47,6 +47,13 @@ class Default(commands.Cog):
         else:
             await ctx.respond(random_joke)
 
+    @bridge.bridge_command(name="purge", description="deletes messages in bulk")
+    @commands.has_permissions(manage_messages=True)
+    async def purge(self, ctx, *, amount: int = 3):
+        await ctx.channel.purge(limit=amount)
+        await ctx.respond(f"I have deleted {amount} message(s).")
+        await ctx.channel.purge(limit=1)
+
 def setup(bot):
     bot.add_cog(Default(bot))
     
