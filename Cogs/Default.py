@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import random
 
 bot_info = '''
 👻 Name: Helper#8515
@@ -29,5 +30,23 @@ class Default(commands.Cog):
     async def botinfo(self, ctx):
         await ctx.respond(bot_info)
 
+    @commands.slash_command(name="roast", description="roast someone for you")
+    async def roast(self, ctx, member: discord.Member):
+        skele_id = 875208986603958344
+        mom_jokes = [
+            f"Yo {member.mention}. Your mama is so old, she knew Gandalf before he had a beard!",
+            f"Yo {member.mention}. Your mom is so slow, when she tried to catch up with the times, she got a calendar from 1995!",
+            f"Yo {member.mention}. Your mama is so sweet, even sugar calls her 'Mom'!",
+            f"Yo {member.mention}. Your mom is so caring, when you're sick, she can make chicken soup from scratch while solving a Rubik's Cube blindfolded!",
+            f"Yo {member.mention}. Yo mama is so funny, she could make a grumpy cat smile!",
+        ]
+
+        random_joke = random.choice(mom_jokes)
+        if member.id == skele_id:
+            await ctx.respond(f"Hey {member.mention}, {ctx.author.mention} is tryna roast you. Do you want me to ban 'em.")
+        else:
+            await ctx.respond(random_joke)
+
 def setup(bot):
     bot.add_cog(Default(bot))
+    
