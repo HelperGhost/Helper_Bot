@@ -15,7 +15,7 @@ bot_info = '''
 👻 Description:
 Hey there, mortal souls! 👋 This is my discord bot, Helper#8515, here to assist and haunt in equal measure! 👻✨ Crafted by the ethereal being known as no_gaming_01, with a massive spectral contribution from .wuid. Together, we're here to make your Discord experience otherworldly! 💀👻👾
 '''
-class Default(commands.Cog):
+class Utilities(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -55,5 +55,5 @@ class Default(commands.Cog):
         await ctx.channel.purge(limit=1)
 
 def setup(bot):
-    bot.add_cog(Default(bot))
+    bot.add_cog(Utilities(bot))
     
