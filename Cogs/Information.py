@@ -59,6 +59,26 @@ class User_Info(commands.Cog):
 
         await ctx.respond(embed=embed)
 
+    @bridge.bridge_command(name="userroles", description="provides the roles of the user")
+    async def user_roles(self, ctx, member: discord.Member = None):
+        if member is None:
+            member = ctx.author
+
+        roles = sorted(member.roles, key=lambda role: role.position, reverse=True)
+        role = ", ".join(f"{member.roles}" for role in roles if role.name != '@everyone')
+
+        embed = discord.Embed(
+            title = "",
+            description = "",
+            color = member.color,
+            timestamp = datetime.datetime.utcnow()
+        )
+
+        embed.set_author(name=f"@{member.name}", icon_url=f"{member.avatar}")
+        embed.add_field(name="**Roles:**", value=f"{role}")
+
+        await ctx.respond(embed=embed)
+
 class Server_info(commands.Cog):
     def __init__(self, Helper):
         self.helper: commands.Bot = Helper
