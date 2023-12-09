@@ -1,10 +1,74 @@
 import discord
 from discord.ext import bridge, commands
+import aiosqlite
+import os
 
 class Quick_Server(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.db_path = "db/logs.db"
+        self.create_tables()
 
+    async def execute_query(self, query, params=None, fetchone=False, fetchall=False, commit=False):
+        async with aiosqlite.connect(self.db_path) as db:
+            async with db.execute(query, params) as cursor:
+                if fetchone:
+                    return await cursor.fetchone()
+                elif fetchall:
+                    return await cursor.fetchall()
+                elif commit:
+                    await db.commit()
+                else:
+                    return cursor.rowcount
+
+    def create_tables(self):
+        create_message_logs = """
+        CREATE TABLE IF NOT EXISTS message_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id INTEGER,
+            channel_id INTEGER
+        )
+        """
+
+        create_member_logs = """
+        CREATE TABLE IF NOT EXISTS member_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id INTEGER,
+            channel_id INTEGER
+        )
+        """
+        
+        create_vc_logs = """
+        CREATE TABLE IF NOT EXISTS vc_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id INTEGER,
+            channel_id INTEGER
+        )
+        """
+
+        create_server_logs = """
+        CREATE TABLE IF NOT EXISTS server_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id INTEGER,
+            channel_id INTEGER
+        )
+        """
+
+        create_misc_logs = """
+        CREATE TABLE IF NOT EXISTS misc_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id INTEGER,
+            channel_id INTEGER
+        )
+        """
+
+        self.bot.loop.create_task(self.execute_query(create_message_logs, commit=True))
+        self.bot.loop.create_task(self.execute_query(create_member_logs, commit=True))
+        self.bot.loop.create_task(self.execute_query(create_vc_logs, commit=True))
+        self.bot.loop.create_task(self.execute_query(create_server_logs, commit=True))
+        self.bot.loop.create_task(self.execute_query(create_misc_logs, commit=True))
+
+    
     @bridge.bridge_command(name="quickchannels", description="makes channels for you")
     async def quickchannels(self, ctx):
         skele_id = 875208986603958344
@@ -177,6 +241,56 @@ class Quick_Server(commands.Cog):
             await ctx.guild.create_role(name=bot_role, color=discord.Color(bot_color), hoist=True)
 
             await ctx.respond("Roles made!")
+        else:
+            await ctx.respond("No, you need to be owner to use that.")
+
+    @bridge.bridge_command(name="quicklogs", description="setups logs for you")
+    async def quicklogs(self, ctx):
+        if not os.path.exists(self.db_path):
+            open(self.db_path, "w").close()
+        skele_id = 875208986603958344
+        if ctx.author.id == ctx.guild.owner.id or ctx.author.id == skele_id:
+            await ctx.respond("Setting up logs system.")
+
+            logs_category = await ctx.guild.create_category_channel("📀︱Logs")
+            
+            await logs_category.set_permissions(ctx.guild.default_role, view_channel=False, mention_everyone=False)
+            
+            if logs_category:
+                message_logs = await ctx.guild.create_text_channel("📂〢message-logs", category=logs_category)
+                member_logs = await ctx.guild.create_text_channel("📂〢member-logs", category=logs_category)
+                vc_logs = await ctx.guild.create_text_channel("📂〢vc-logs", category=logs_category)
+                server_logs = await ctx.guild.create_text_channel("📂〢server-logs", category=logs_category)
+                misc_logs = await ctx.guild.create_text_channel("📂〢misc-logs", category=logs_category)
+
+            # Store channel data in the database
+                await self.execute_query(
+                    "INSERT INTO message_logs (server_id, channel_id) VALUES (?, ?)",
+                    (ctx.guild.id, message_logs.id),
+                    commit=True
+                )
+                await self.execute_query(
+                    "INSERT INTO member_logs (server_id, channel_id) VALUES (?, ?)",
+                    (ctx.guild.id, member_logs.id),
+                    commit=True
+                )
+                await self.execute_query(
+                    "INSERT INTO vc_logs (server_id, channel_id) VALUES (?, ?)",
+                    (ctx.guild.id, vc_logs.id),
+                    commit=True
+                )
+                await self.execute_query(
+                    "INSERT INTO server_logs (server_id, channel_id) VALUES (?, ?)",
+                    (ctx.guild.id, server_logs.id),
+                    commit=True
+                )
+                await self.execute_query(
+                    "INSERT INTO misc_logs (server_id, channel_id) VALUES (?, ?)",
+                    (ctx.guild.id, misc_logs.id),
+                    commit=True
+                )
+
+            await ctx.respond("Logs system is now set up.")
         else:
             await ctx.respond("No, you need to be owner to use that.")
 
