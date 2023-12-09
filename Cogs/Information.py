@@ -59,13 +59,13 @@ class User_Info(commands.Cog):
 
         await ctx.respond(embed=embed)
 
-    @bridge.bridge_command(name="userroles", description="provides the roles of the user")
+    @bridge.bridge_command(name="user_roles", description="provides the roles of the user")
     async def user_roles(self, ctx, member: discord.Member = None):
         if member is None:
             member = ctx.author
 
         roles = sorted(member.roles, key=lambda role: role.position, reverse=True)
-        role = ", ".join(f"{member.roles}" for role in roles if role.name != '@everyone')
+        role = ", ".join(f"{role.mention}" for role in roles if role.name != '@everyone')
 
         embed = discord.Embed(
             title = "",
