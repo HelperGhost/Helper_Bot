@@ -52,5 +52,30 @@ class LogsSystem(commands.Cog):
 
                 await logs_channel.send(embed=embed)
 
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        query = "SELECT channel_id FROM member_logs WHERE server_id = ?"
+        result = await self.bot.get_cog("Quick_Server").execute_query(query, (member.guild.id,), fetchone=True)
+
+        if result:
+            channel_id = result[0]
+            logs_channel = self.bot.get_channel(channel_id)
+
+            if logs_channel:
+                account_created_at = member.created_at
+                account_time = datetime.datetime.timestamp(account_created_at)
+                account_time_1 = round(account_time)
+                embed = discord.Embed(
+                    title="Member Joined!",
+                    description="",
+                    color=discord.Color.blurple(),
+                    timestamp=datetime.datetime.utcnow()
+                )
+                embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
+                embed.add_field(name="User info:", value=f"ID: {member.id}\nName: {member.mention}", inline=False)
+                embed.add_field(name="Account Age:", value=f"<t:{account_time_1}:F> (<t:{account_time_1}:R>)", inline=False)
+
+                await logs_channel.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(LogsSystem(bot))
