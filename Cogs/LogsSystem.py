@@ -16,15 +16,17 @@ class LogsSystem(commands.Cog):
             logs_channel = self.bot.get_channel(channel_id)
 
             if logs_channel:
+                message_link = f"https://discord.com/channels/{before.guild.id}/{before.channel.id}/{before.id}"
                 # Send a message when a message is edited
                 embed = discord.Embed(
-                    title="Message Edited",
-                    description=f"Author: {before.author.mention}\n"
-                                f"Channel: {before.channel.mention}",
-                    color=discord.Color.orange()
+                    title="Message Edited!",
+                    description=f"Message edited in {before.channel.mention} [Link]({message_link}).",
+                    color=discord.Color.blurple(),
+                    timestamp=datetime.datetime.utcnow()
                 )
-                embed.add_field(name="Before", value=before.content, inline=False)
-                embed.add_field(name="After", value=after.content, inline=False)
+                embed.set_author(name=f"@{before.author.name}", icon_url=before.author.avatar)
+                embed.add_field(name="Before:", value=before.content, inline=False)
+                embed.add_field(name="After:", value=after.content, inline=False)
 
                 await logs_channel.send(embed=embed)
 
