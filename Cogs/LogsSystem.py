@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import datetime
 
 class LogsSystem(commands.Cog):
     def __init__(self, bot):
@@ -27,6 +28,27 @@ class LogsSystem(commands.Cog):
                 embed.set_author(name=f"@{before.author.name}", icon_url=before.author.avatar)
                 embed.add_field(name="Before:", value=before.content, inline=False)
                 embed.add_field(name="After:", value=after.content, inline=False)
+
+                await logs_channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        query = "SELECT channel_id FROM message_logs WHERE server_id = ?"
+        result = await self.bot.get_cog("Quick_Server").execute_query(query, (message.guild.id,), fetchone=True)
+
+        if result:
+            channel_id = result[0]
+            logs_channel = self.bot.get_channel(channel_id)
+
+            if logs_channel:
+                embed = discord.Embed(
+                    title="Message Deleted!",
+                    description=f"A message was deleted in {message.channel.mention}.",
+                    color=discord.Color.red(),
+                    timestamp=datetime.datetime.utcnow()
+                )
+                embed.set_author(name=f"@{message.author.name}", icon_url=message.author.avatar)
+                embed.add_field(name="Message:", value=message.content, inline=False)
 
                 await logs_channel.send(embed=embed)
 
