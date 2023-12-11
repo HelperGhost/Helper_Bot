@@ -3,7 +3,7 @@ from discord.ext import bridge, commands
 import aiosqlite
 import os
 
-class Quick_Server(commands.Cog):
+class QuickServer(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.db_path = "db/logs.db"
@@ -295,4 +295,4 @@ class Quick_Server(commands.Cog):
             await ctx.respond("No, you need to be owner to use that.")
 
 def setup(bot):
-    bot.add_cog(Quick_Server(bot))      
+    bot.add_cog(QuickServer(bot))      

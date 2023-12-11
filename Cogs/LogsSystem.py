@@ -10,7 +10,7 @@ class LogsSystem(commands.Cog):
     async def on_message_edit(self, before, after):
         # Check if the server_id exists in the message_logs table
         query = "SELECT channel_id FROM message_logs WHERE server_id = ?"
-        result = await self.bot.get_cog("Quick_Server").execute_query(query, (before.guild.id,), fetchone=True)
+        result = await self.bot.get_cog("QuickServer").execute_query(query, (before.guild.id,), fetchone=True)
 
         if result:
             channel_id = result[0]
@@ -34,7 +34,7 @@ class LogsSystem(commands.Cog):
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         query = "SELECT channel_id FROM message_logs WHERE server_id = ?"
-        result = await self.bot.get_cog("Quick_Server").execute_query(query, (message.guild.id,), fetchone=True)
+        result = await self.bot.get_cog("QuickServer").execute_query(query, (message.guild.id,), fetchone=True)
 
         if result:
             channel_id = result[0]
@@ -55,7 +55,7 @@ class LogsSystem(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member):
         query = "SELECT channel_id FROM member_logs WHERE server_id = ?"
-        result = await self.bot.get_cog("Quick_Server").execute_query(query, (member.guild.id,), fetchone=True)
+        result = await self.bot.get_cog("QuickServer").execute_query(query, (member.guild.id,), fetchone=True)
 
         if result:
             channel_id = result[0]
@@ -63,8 +63,7 @@ class LogsSystem(commands.Cog):
 
             if logs_channel:
                 account_created_at = member.created_at
-                account_time = datetime.datetime.timestamp(account_created_at)
-                account_time_1 = round(account_time)
+                account_age = round(datetime.datetime.timestamp(account_created_at))
                 embed = discord.Embed(
                     title="Member Joined!",
                     description="",
@@ -72,8 +71,31 @@ class LogsSystem(commands.Cog):
                     timestamp=datetime.datetime.utcnow()
                 )
                 embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
+                embed.set_thumbnail(url=member.avatar)
                 embed.add_field(name="User info:", value=f"ID: {member.id}\nName: {member.mention}", inline=False)
-                embed.add_field(name="Account Age:", value=f"<t:{account_time_1}:F> (<t:{account_time_1}:R>)", inline=False)
+                embed.add_field(name="Account Age:", value=f"<t:{account_age}:D> (<t:{account_age}:R>)", inline=False)
+
+                await logs_channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        query = "SELECT channel_id FROM member_logs WHERE server_id = ?"
+        result = await self.bot.get_cog("QuickServer").execute_query(query, (member.guild.id,), fetchone=True)
+
+        if result:
+            channel_id = result[0]
+            logs_channel = self.bot.get_channel(channel_id)
+
+            if logs_channel:
+                embed = discord.Embed(
+                    title="Member Left!",
+                    description="",
+                    color=discord.Color.red(),
+                    timestamp=datetime.datetime.utcnow()
+                )
+                embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
+                embed.set_thumbnail(url=member.avatar)
+                embed.add_field(name="User info:", value=f"ID: {member.id}\nName: {member.mention}", inline=False)
 
                 await logs_channel.send(embed=embed)
 
