@@ -193,5 +193,77 @@ class LogsSystem(commands.Cog):
 
                 await logs_channel.send(embed=embed)
 
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        query = "SELECT channel_id FROM vc_logs WHERE server_id = ?"
+        result = await self.bot.get_cog("QuickServer").execute_query(query, (member.guild.id,), fetchone=True)
+
+        if result:
+            channel_id = result[0]
+            logs_channel = self.bot.get_channel(channel_id)
+
+            if logs_channel:
+                if not before.channel and after.channel:
+                    embed = discord.Embed(
+                        title="Member Joined Voice Channel!",
+                        description=f"{member.mention} joined the voice channel {after.channel.mention}",
+                        color=0x00FF00,
+                        timestamp=datetime.datetime.utcnow()
+                    )
+                    embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
+                    embed.set_thumbnail(url=member.avatar)
+                    
+                    await logs_channel.send(embed=embed)
+
+                elif before.channel and not after.channel:
+                    embed = discord.Embed(
+                        title="Member Left Voice Channel!",
+                        description=f"{member.mention} left the voice channel {before.channel.mention}",
+                        color=0xFF0000,
+                        timestamp=datetime.datetime.utcnow()
+                    )
+                    embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
+                    embed.set_thumbnail(url=member.avatar)
+
+                    await logs_channel.send(embed=embed)
+
+                elif before.channel and after.channel and before.channel != after.channel:
+                    embed = discord.Embed(
+                        title="Member Moved Between Voice Channels!",
+                        description=f"{member.mention} moved from {before.channel.mention} to {after.channel.mention}",
+                        color=0x0000FF,
+                        timestamp=datetime.datetime.utcnow()
+                    )
+                    embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
+                    embed.set_thumbnail(url=member.avatar)
+
+                    await logs_channel.send(embed=embed)
+
+                elif before.mute != after.mute or before.deaf != after.deaf:
+                    mute_status = "muted" if after.mute else "unmuted"
+                    embed = discord.Embed(
+                        title="Member Mic Got Updated!",
+                        description=f"{member.mention} was {mute_status}.",
+                        color=0xFFFF00,
+                        timestamp=datetime.datetime.utcnow()
+                    )
+                    embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
+                    embed.set_thumbnail(url=member.avatar)
+
+                    await logs_channel.send(embed=embed)
+                
+                elif before.deaf != after.deaf:
+                    deaf_status = "deafened" if after.deaf else "undeafened"
+                    embed = discord.Embed(
+                        title="Member Speaker Got Updated!",
+                        description=f"{member.mention} was {deaf_status}.",
+                        color=0XFFF00,
+                        timestamp=datetime.datetime.utcnow()
+                    )
+                    embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
+                    embed.set_thumbnail(url=member.avatar)
+
+                    await logs_channel.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(LogsSystem(bot))
