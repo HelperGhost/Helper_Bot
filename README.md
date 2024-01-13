@@ -1,3 +1,7 @@
 # Helper Discord Server Bot
-Helper is a discord server bot to moderate the server.
-Make sure to read the comments and follow them to make your own bot.
+Helper is A Simple, But Well made discord bot. Made by no_gaming_01, Remade in Nextcord by jqm1e / dot-wuid
+Thanks For Using Helper.
+
+dsc.gg/binarybitlab
+
+Report any bugs by DMing jqm1e on discord, or in the Issues tab here on github!

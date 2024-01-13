@@ -1,10 +1,22 @@
-import discord
-from discord.ext import commands
+import nextcord
+from nextcord import Client, Intents, Embed
+from nextcord.ext import commands
+import json
+from datetime import datetime
 import datetime
+from typing import List, Dict
 
-class LogsSystem(commands.Cog):
+import random
+
+
+class logs(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f"logs Cog Status : ✅")
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
@@ -19,10 +31,10 @@ class LogsSystem(commands.Cog):
             if logs_channel:
                 message_link = f"https://discord.com/channels/{before.guild.id}/{before.channel.id}/{before.id}"
                 # Send a message when a message is edited
-                embed = discord.Embed(
+                embed = nextcord.Embed(
                     title="Message Edited!",
                     description=f"Message edited in {before.channel.mention} [Link]({message_link}).",
-                    color=discord.Color.blurple(),
+                    color=nextcord.Color.blurple(),
                     timestamp=datetime.datetime.utcnow()
                 )
                 embed.set_author(name=f"@{before.author.name}", icon_url=before.author.avatar)
@@ -41,10 +53,10 @@ class LogsSystem(commands.Cog):
             logs_channel = self.bot.get_channel(channel_id)
 
             if logs_channel:
-                embed = discord.Embed(
+                embed = nextcord.Embed(
                     title="Message Deleted!",
                     description=f"A message was deleted in {message.channel.mention}.",
-                    color=discord.Color.red(),
+                    color=nextcord.Color.red(),
                     timestamp=datetime.datetime.utcnow()
                 )
                 embed.set_author(name=f"@{message.author.name}", icon_url=message.author.avatar)
@@ -64,10 +76,10 @@ class LogsSystem(commands.Cog):
             if logs_channel:
                 account_created_at = member.created_at
                 account_age = round(datetime.datetime.timestamp(account_created_at))
-                embed = discord.Embed(
+                embed = nextcord.Embed(
                     title="Member Joined!",
                     description="",
-                    color=discord.Color.blurple(),
+                    color=nextcord.Color.blurple(),
                     timestamp=datetime.datetime.utcnow()
                 )
                 embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
@@ -87,10 +99,10 @@ class LogsSystem(commands.Cog):
             logs_channel = self.bot.get_channel(channel_id)
 
             if logs_channel:
-                embed = discord.Embed(
+                embed = nextcord.Embed(
                     title="Member Left!",
                     description="",
-                    color=discord.Color.red(),
+                    color=nextcord.Color.red(),
                     timestamp=datetime.datetime.utcnow()
                 )
                 embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
@@ -110,7 +122,7 @@ class LogsSystem(commands.Cog):
 
             if logs_channel:
                 if before.nick != after.nick:
-                    embed = discord.Embed(
+                    embed = nextcord.Embed(
                         title="Nickname Changed!",
                         description=f"{after.mention} nickname was changed.",
                         color=0xFFA500,
@@ -125,7 +137,7 @@ class LogsSystem(commands.Cog):
 
                 added_roles = set(after.roles) - set(before.roles)
                 if added_roles:
-                    embed = discord.Embed(
+                    embed = nextcord.Embed(
                         title="Role Added!",
                         description="",
                         color=0x1FE231,
@@ -139,7 +151,7 @@ class LogsSystem(commands.Cog):
 
                 removed_roles = set(before.roles) - set(after.roles)
                 if removed_roles:
-                    embed = discord.Embed(
+                    embed = nextcord.Embed(
                         title="Role Removed!",
                         description="",
                         color=0xFF0000,
@@ -161,10 +173,10 @@ class LogsSystem(commands.Cog):
             logs_channel = self.bot.get_channel(channel_id)
 
             if logs_channel:
-                embed = discord.Embed(
+                embed = nextcord.Embed(
                     title="Member Banned!",
                     description=f"{user.mention} has been banned from the server.",
-                    color=discord.Color.red(),
+                    color=nextcord.Color.red(),
                     timestamp=datetime.datetime.utcnow()
                 )
                 embed.set_author(name=f"@{user.name}", icon_url=user.avatar)
@@ -182,10 +194,10 @@ class LogsSystem(commands.Cog):
             logs_channel = self.bot.get_channel(channel_id)
 
             if logs_channel:
-                embed = discord.Embed(
+                embed = nextcord.Embed(
                     title="Member Unbanned!",
                     description=f"{user.mention} has been unbanned from the server.",
-                    color=discord.Color.red(),
+                    color=nextcord.Color.red(),
                     timestamp=datetime.datetime.utcnow()
                 )
                 embed.set_author(name=f"@{user.name}", icon_url=user.avatar)
@@ -204,7 +216,7 @@ class LogsSystem(commands.Cog):
 
             if logs_channel:
                 if not before.channel and after.channel:
-                    embed = discord.Embed(
+                    embed = nextcord.Embed(
                         title="Member Joined Voice Channel!",
                         description=f"{member.mention} joined the voice channel {after.channel.mention}",
                         color=0x00FF00,
@@ -216,7 +228,7 @@ class LogsSystem(commands.Cog):
                     await logs_channel.send(embed=embed)
 
                 elif before.channel and not after.channel:
-                    embed = discord.Embed(
+                    embed = nextcord.Embed(
                         title="Member Left Voice Channel!",
                         description=f"{member.mention} left the voice channel {before.channel.mention}",
                         color=0xFF0000,
@@ -228,7 +240,7 @@ class LogsSystem(commands.Cog):
                     await logs_channel.send(embed=embed)
 
                 elif before.channel and after.channel and before.channel != after.channel:
-                    embed = discord.Embed(
+                    embed = nextcord.Embed(
                         title="Member Moved Between Voice Channels!",
                         description=f"{member.mention} moved from {before.channel.mention} to {after.channel.mention}",
                         color=0x0000FF,
@@ -241,7 +253,7 @@ class LogsSystem(commands.Cog):
 
                 elif before.mute != after.mute or before.deaf != after.deaf:
                     mute_status = "muted" if after.mute else "unmuted"
-                    embed = discord.Embed(
+                    embed = nextcord.Embed(
                         title="Member Mic Got Updated!",
                         description=f"{member.mention} was {mute_status}.",
                         color=0xFFFF00,
@@ -254,7 +266,7 @@ class LogsSystem(commands.Cog):
                 
                 elif before.deaf != after.deaf:
                     deaf_status = "deafened" if after.deaf else "undeafened"
-                    embed = discord.Embed(
+                    embed = nextcord.Embed(
                         title="Member Speaker Got Updated!",
                         description=f"{member.mention} was {deaf_status}.",
                         color=0XFFF00,
@@ -265,5 +277,27 @@ class LogsSystem(commands.Cog):
 
                     await logs_channel.send(embed=embed)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def setup(bot):
-    bot.add_cog(LogsSystem(bot))
+    bot.add_cog(logs(bot))
