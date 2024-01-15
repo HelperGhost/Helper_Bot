@@ -11,7 +11,7 @@ class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @bridge.bridge_command(name="gtn", description="Guess The Number game")
+    @bridge.bridge_command(guild_ids=[guild_id], name="gtn", description="Guess The Number game")
     async def gtn(self, ctx):
         # Code for Guess The Number game logic
         num = random.randint(1, 100)
