@@ -16,7 +16,7 @@ class Fun(commands.Cog):
         # Code for Guess The Number game logic
         num = random.randint(1, 100)
         # Send intro message
-        await ctx.send("I'm thinking of a number between 1 and 100. Try to guess it!")
+        await ctx.respond("I'm thinking of a number between 1 and 100. Try to guess it!")
         # Keep track of number of guesses
         guess_count = 0
         # Accept guesses and give feedback
