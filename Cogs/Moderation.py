@@ -3,94 +3,149 @@ from discord.ext import bridge, commands
 import datetime
 import asyncio
 
-muted_role_name = "Muted"
-
 class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    # This is the command to ban people in the server
-    @bridge.bridge_command(name="ban", description="to ban any member in the server")
+        
+    @bridge.bridge_command(name="ban", description="To ban a user from the server")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason="No reason provided"):
         try:
-            await member.ban()
-            await ctx.respond(f'<@{member.id}> has been banned. Reason: {reason}.')
+            await member.ban(reason=reason)
+            embed = discord.Embed(title="User Banned", description=f"{member} was banned. Reason: {reason}.", color=0x00ff00)
+            embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar)
+            embed.set_footer(text=f"User ID: {member.id}")
+            await ctx.respond(embed=embed)
         except discord.Forbidden:
-            await ctx.respond("I don't have permission to ban members.") # Bot will respond this if it does not have the permissions
+            await ctx.respond("I do not have permissions to ban members")
         except discord.HTTPException:
-            await ctx.respond("An error occured while processing the ban command.") # Bot will respond this if there is an error while connecting to discord
+            await ctx.respond("Banning failed, please try again later")
 
-    # Timeout command now works
-    @bridge.bridge_command(name="timeout", description="to timeout a member in the server")
+    @ban.error
+    async def ban_error(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.respond("You do not have permissions to ban members.")
+        elif isinstance(error, commands.BadArgument):
+            await ctx.respond("Please mention a valid member of this server to ban.")
+        else:
+            await ctx.respond(f"An error occurred while banning: {error}")
+        
+    @bridge.bridge_command(name="kick", description="To kick a user from the server")
     @commands.has_permissions(kick_members=True)
-    async def timeout(self, ctx, member: discord.Member, time: int = 10, *, reason: str ="No reason provided"):
-        duration = datetime.datetime.utcnow() + datetime.timedelta(minutes=time)
-        await member.timeout(duration, reason=reason)
-        await ctx.respond(f'{member.mention} has been timed out. reason: {reason}.')
-
-    @bridge.bridge_command(name="mute", description="to mute a member in discord server")
-    @commands.has_permissions(manage_roles=True)
-    async def mute(self, ctx, member: discord.Member, time: int = 10, reason: str ="No reason provided"):
-        muted_role = discord.utils.get(ctx.guild.roles, name=muted_role_name)
-        duration = time * 60
-        try:
-            if not muted_role:
-                muted_role = ctx.guild.create_role(name=muted_role_name)
-
-            await member.add_roles(muted_role, reason=reason)
-            await ctx.respond(f'{member.mention} has been muted for {time} minutes. Reason: {reason}.')
-
-            await asyncio.sleep(duration)
-
-            await member.remove_roles(muted_role)
-            await ctx.respond(f'{member.mention} has been unmuted after {time} minutes.')
-        except discord.Forbidden:
-            await ctx.respond("I don't have permission to mute members.") # Bot will respond this if it does not have the permissions
-        except discord.HTTPException:
-            await ctx.respond("An error occured while processing the mute command.") # Bot will respond this if there is an error while connecting to discord
-
-    @bridge.bridge_command(name="unban", description="to unban a member.")
-    @commands.has_permissions(ban_members=True)
-    async def unban(self, ctx, member: discord.User, *, reason: str = "No reason provided"):
-        try:
-            await ctx.guild.unban(user=member)
-            await ctx.respond(f'<@{member.id}> has been unbanned. Reason: {reason}.')
-        except discord.Forbidden:
-            await ctx.respond("I don't have permission to unban members.") # Bot will respond this if it does not have the permissions
-        except discord.HTTPException:
-            await ctx.respond("An error occured while processing the unban command.") # Bot will respond this if there is an error while connecting to discord
-
-    @bridge.bridge_command(name="unmute", description="to unmute a member in discord server.")
-    @commands.has_permissions(manage_roles=True)
-    async def unmute(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
-        muted_role = discord.utils.get(ctx.guild.roles, name=muted_role_name)
-        try:
-            if not muted_role:
-                await ctx.respond("The Muted role doesn't exist.")
-                return
-
-            if muted_role not in member.roles:
-                ctx.respond(f'{member.name} is not muted.')
-                return
-
-            await member.remove_roles(muted_role)
-            await ctx.respond(f'{member.mention} has been unmuted. Reason: {reason}.')
-        except discord.Forbidden:
-            await ctx.respond("I don't have permission to unmute members.") # Bot will respond this if it does not have the permissions
-        except discord.HTTPException:
-            await ctx.respond("An error occured while processing the unmute command.") # Bot will respond this if there is an error while connecting to discord
-
-    @bridge.bridge_command(name="kick", description="to kick a member in the discord server.")
-    @commands.has_permissions(kick_members=True)
-    async def kick(self, ctx, member: discord.Member, *, reason: str = "No reason provided"):
+    async def kick(self, ctx, member: discord.Member, *, reason="No reason provided"):
         try:
             await member.kick(reason=reason)
-            await ctx.respond(f'<@{member.id}> has been kicked from the server. Reason: {reason}.')
+            embed = discord.Embed(title="User Kicked", description=f"{member} was kicked. Reason: {reason}.", color=0xff0000)
+            embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar)
+            embed.set_footer(text=f"User ID: {member.id}")
+            await ctx.respond(embed=embed)
         except discord.Forbidden:
-            await ctx.respond("I don't have permission to kick members.") # Bot will respond this if it does not have the permissions
+            await ctx.respond("I do not have permissions to kick members")
         except discord.HTTPException:
-            await ctx.respond("An error occured while processing the kick command.") # Bot will respond this if there is an error while connecting to discord
+            await ctx.respond("Kicking failed, please try again later")
+
+    @kick.error
+    async def kick_error(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.respond("You do not have permissions to kick members.")
+        elif isinstance(error, commands.BadArgument):
+            await ctx.respond("Please mention a valid member of this server to kick.")
+        else:
+            await ctx.respond(f"An error occurred while kicking: {error}")
+    
+    @bridge.bridge_command(name="mute", description="To mute a user in the server")
+    @commands.has_permissions(kick_members=True)
+    async def mute(self, ctx, member: discord.Member, time: int = 10, *, reason="No reason provided"):
+        try:
+            duration = datetime.datetime.utcnow() + datetime.timedelta(minutes=time)
+            await member.timeout(duration, reason=reason)
+            embed = discord.Embed(title="User Muted", description=f"{member} was muted for {time} minutes. Reason: {reason}.", color=0xffff00)
+            embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar)
+            embed.set_footer(text=f"User ID: {member.id}")
+            await ctx.respond(embed=embed)
+        except discord.Forbidden:
+            await ctx.respond("I do not have permissions to mute members")
+        except discord.HTTPException:
+            await ctx.respond("Muting failed, please try again later")
+
+    @mute.error
+    async def mute_error(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.respond("You do not have permissions to mute members.")
+        elif isinstance(error, commands.BadArgument):
+            await ctx.respond("Please mention a valid member of this server to mute or provide a valid duration in minutes.")
+        elif isinstance(error, ValueError):
+            await ctx.respond("Please provide a valid number for duration in minutes.")
+        else:
+            await ctx.respond(f"An error occurred while muting: {error}")
+
+    @bridge.bridge_command(name="unban", description="To unban a user from the server")
+    @commands.has_permissions(ban_members=True)
+    async def unban(self, ctx, user: discord.User, *, reason="No reason provided"):
+        try:
+            await ctx.guild.unban(discord.Object(id=user.id), reason=reason)
+            embed = discord.Embed(title="User Unbanned", description=f"Unbanned {user.name}. Reason: {reason}.", color=0x00ff00)
+            embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar)
+            embed.set_footer(text=f"User ID: {user.id}")
+            await ctx.respond(embed=embed)
+        except discord.Forbidden:
+            await ctx.respond("I do not have permissions to unban members")
+        except discord.HTTPException:
+            await ctx.respond("Unbanning failed, please try again later")
+
+    @unban.error
+    async def unban_error(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.respond("You do not have permissions to unban members.")
+        elif isinstance(error, commands.BadArgument):
+            await ctx.respond("Please provide a valid member ID to unban.")
+        elif isinstance(error, discord.NotFound):
+            await ctx.respond("The member ID provided is invalid or not banned from this server.")
+        else:
+            await ctx.respond(f"An error occurred while unbanning: {error}")
+
+    @bridge.bridge_command(name = "unmute", description = "To unmute a muted user in the server")
+    @commands.has_permissions(kick_members = True)
+    async def unmute(self, ctx, member: discord.Member, *, reason="No reason provided"):
+        try:
+            await member.remove_timeout()
+            embed = discord.Embed(title="User Unmuted", description=f"{member} was unmuted. Reason: {reason}.", color=0x00ff00)
+            embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar)
+            embed.set_footer(text=f"User ID: {member.id}")
+            await ctx.respond(embed=embed)
+        except discord.Forbidden:
+            await ctx.respond("I do not have permissions to unmute members")
+        except discord.HTTPException:
+            await ctx.respond("Unmuting failed, please try again later")
+
+    @unmute.error
+    async def unmute_error(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.respond("You do not have permissions to unmute members.")
+        elif isinstance(error, commands.BadArgument):
+            await ctx.respond("Please mention a valid member of this server to unmute.")
+        elif isinstance(error, discord.NotFound):
+            await ctx.respond("The member provided is not muted in this server.")
+        else:
+            await ctx.respond(f"An error occurred while unmuting: {error}")
+
+    @bridge.bridge_command(name="purge", description="To purge messages from a channel")
+    @commands.has_permissions(manage_messages=True)
+    async def purge(self, ctx, limit: int):
+        await ctx.respond(f"Purging {limit} messages...")
+        await ctx.channel.purge(limit=limit)
+        await asyncio.sleep(3)
+        await ctx.send(f"{limit} messages purged")
+        await ctx.channel.purge(limit=1)
+
+    @purge.error
+    async def purge_error(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.respond("You do not have permissions to purge messages.")
+        elif isinstance(error, commands.BadArgument):
+            await ctx.respond("Please provide a valid number for the message limit.")
+        else:
+            await ctx.respond(f"An error occurred while purging: {error}")
 
 def setup(bot):
     bot.add_cog(Moderation(bot))
