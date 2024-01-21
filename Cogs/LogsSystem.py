@@ -88,5 +88,26 @@ class LogsSystem(commands.Cog):
 
                 await channel.send(embed=embed)
 
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        query = "SELECT channel_id FROM member_logs WHERE guild_id =?"
+        result = await self.db.fetchone(query, member.guild.id)
+        if result:
+            channel_id = result[0]
+            channel = self.bot.get_channel(channel_id)
+
+            if channel:
+                embed = discord.Embed(
+                    title="Member Left",
+                    description=f"{member.mention} left the server",
+                    color=discord.Color.red(),
+                    timestamp=datetime.datetime.utcnow()
+                )
+                embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
+                embed.set_thumbnail(url=member.avatar)
+                embed.add_field(name="User info:", value=f"ID: {member.id}\nName: {member.mention}", inline=False)
+
+                await channel.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(LogsSystem(bot))
