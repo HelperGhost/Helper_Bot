@@ -109,5 +109,58 @@ class LogsSystem(commands.Cog):
 
                 await channel.send(embed=embed)
 
+    @commands.Cog.listener()
+    async def on_member_update(self, before, after):
+        query = "SELECT channel_id FROM member_logs WHERE guild_id =?"
+        result = await self.db.fetchone(query, before.guild.id)
+        if result:
+            channel_id = result[0]
+            channel = self.bot.get_channel(channel_id)
+
+            if channel:
+                if before.nick != after.nick:
+                    embed = discord.Embed(
+                        title="Nickname Changed",
+                        description=f"Nickname changed for {before.mention}",
+                        color=discord.Color.blurple(),
+                        timestamp=datetime.datetime.utcnow()
+                    )
+                    embed.set_author(name=f"@{before.name}", icon_url=before.avatar)
+                    embed.set_thumbnail(url=before.avatar)
+                    embed.add_field(name="Before", value=before.nick, inline=False)
+                    embed.add_field(name="After", value=after.nick, inline=False)
+
+                    await channel.send(embed=embed)
+
+                if before.roles!= after.roles:
+                    added_roles = [role for role in after.roles if role not in before.roles]
+                    removed_roles = [role for role in before.roles if role not in after.roles]
+
+                    if added_roles:
+                        embed = discord.Embed(
+                            title="Role Added",
+                            description=f"Role added to {before.mention}",
+                            color=discord.Color.blurple(),
+                            timestamp=datetime.datetime.utcnow()
+                        )
+                        embed.set_author(name=f"@{before.name}", icon_url=before.avatar)
+                        embed.set_thumbnail(url=before.avatar)
+                        embed.add_field(name="Role:", value=", ".join(role.mention for role in added_roles), inline=False)
+
+                        await channel.send(embed=embed)
+
+                    if removed_roles:
+                        embed = discord.Embed(
+                            title="Role Removed",
+                            description=f"Role removed from {before.mention}",
+                            color=discord.Color.blurple(),
+                            timestamp=datetime.datetime.utcnow()
+                        )
+                        embed.set_author(name=f"@{before.name}", icon_url=before.avatar)
+                        embed.set_thumbnail(url=before.avatar)
+                        embed.add_field(name="Role:", value=", ".join(role.mention for role in removed_roles), inline=False)
+
+                        await channel.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(LogsSystem(bot))
