@@ -1,3 +1,14 @@
-# Helper Discord Server Bot
-Helper is a discord server bot to moderate the server.
-Make sure to read the comments and follow them to make your own bot.
+# Helper Bot
+
+A Discord bot for everyone to use and also to make thier own discord bot.
+
+# How to get stated?
+
+- Go to https://discord.com/developers/
+- Create a new application
+- Reset the token
+- For this repository and clone it
+- Add your token in the .env file
+- Add the bot to you server
+- Run the bot.py file
+- And enjoy
