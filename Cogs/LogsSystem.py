@@ -1,4 +1,3 @@
-from unittest import result
 import discord
 from discord.ext import commands
 from helperdb import Database
