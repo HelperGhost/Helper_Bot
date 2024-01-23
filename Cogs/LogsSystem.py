@@ -182,5 +182,26 @@ class LogsSystem(commands.Cog):
 
                 await channel.send(embed=embed)
 
+    @commands.Cog.listener()
+    async def on_member_unban(self, guild, user):
+        query = "SELECT channel_id FROM member_logs WHERE guild_id =?"
+        result = await self.db.fetchone(query, guild.id)
+        if result:
+            channel_id = result[0]
+            channel = self.bot.get_channel(channel_id)
+
+            if channel:
+                embed = discord.Embed(
+                    title="Member Unbanned",
+                    description=f"{user.mention} was unbanned from the server",
+                    color=discord.Color.green(),
+                    timestamp=datetime.datetime.utcnow()
+                )
+                embed.set_author(name=f"@{user.name}", icon_url=user.avatar)
+                embed.set_thumbnail(url=user.avatar)
+                embed.add_field(name="User info:", value=f"ID: {user.id}\nName: {user.mention}", inline=False)
+
+                await channel.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(LogsSystem(bot))
