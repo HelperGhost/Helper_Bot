@@ -12,3 +12,5 @@ A Discord bot for everyone to use and also to make thier own discord bot.
 - Add the bot to you server
 - Run the bot.py file
 - And enjoy
+
+# To get support visit https://dsc.gg/binarybitlab
