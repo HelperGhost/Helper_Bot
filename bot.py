@@ -18,7 +18,7 @@ class Bot(commands.Bot):
                 if file == "__init__.py":
                     return
                 cog = file[:-3]
-                self.load_extension(f"cogs.{cog}")
+                await self.load_extension(f"cogs.{cog}")
             except Exception as e:
                 print(f"Failed to load {cog} due to {e.__class__.__name__}: {e}")
 
