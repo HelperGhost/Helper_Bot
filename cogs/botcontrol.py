@@ -89,6 +89,8 @@ class BotControl(commands.Cog):
             )
             await ctx.send(embed=embed)
             return
+        else:
+            await ctx.send(f"Error: {error}")
 
 async def setup(bot):
     await bot.add_cog(BotControl(bot))
