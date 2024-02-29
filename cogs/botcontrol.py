@@ -73,6 +73,22 @@ class BotControl(commands.Cog):
             )
             await ctx.send(embed=embed)
             return
+        if isinstance(error, commands.MissingRequiredArgument):
+            embed = discord.Embed(
+                title="Missing Required Argument!",
+                description="You are missing a required argument.",
+                color=0xff0000
+            )
+            await ctx.send(embed=embed)
+            return
+        if isinstance(error, commands.MemberNotFound):
+            embed = discord.Embed(
+                title="Member Not Found!",
+                description=f"{error}.",
+                color=0xff0000
+            )
+            await ctx.send(embed=embed)
+            return
 
 async def setup(bot):
     await bot.add_cog(BotControl(bot))
