@@ -1,7 +1,45 @@
 from discord.ext import commands
 import discord
+from discord.ui import View, Select
 from typing import Optional
 from datetime import datetime
+
+class HelpSelect(Select):
+    def __init__(self, bot: commands.Bot):
+        super().__init__(
+            placeholder="Choose a Cog.",
+            options=[
+                discord.SelectOption(
+                    label=cog_name, description=cog.__doc__
+                ) for cog_name, cog in bot.cogs.items() if cog.__cog_commands__ and cog_name not in ["BotControl"]
+            ]
+        )
+        self.bot = bot
+
+    async def on_timeout(self):
+        self.disable_all_items()
+
+    async def callback(self, interaction: discord.Interaction):
+        cog = self.bot.get_cog(self.values[0])
+        assert cog
+
+        commands_mixer = []
+
+        for i in cog.walk_commands():
+            if i.hidden:
+                continue
+            commands_mixer.append(i)
+        for i in cog.walk_app_commands():
+            if i.hidden:
+                continue
+            commands_mixer.append(i)
+
+        embed = discord.Embed(
+            title=f"{cog.__cog_name__} Commands",
+            description="\n".join(f"`{command.name}`: {command.description}" for command in commands_mixer),
+            color=0x1fe2f3
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 class Utility(commands.Cog):
     """The Utility Cog ig."""
@@ -11,7 +49,15 @@ class Utility(commands.Cog):
 
     @commands.hybrid_command(name="help", description="Shows the help menu.")
     async def help(self, ctx: commands.Context, command: Optional[str]=None):
-        await ctx.send("This command is still underdevelopment.")
+        embed = discord.Embed(
+            title="Help",
+            description="The help menu of Helper Bot.",
+            color=0x1fe2f3
+        )
+        embed.set_author(name=f"@{self.bot.user}", icon_url=self.bot.user.avatar)
+        embed.set_thumbnail(url=self.bot.user.avatar)
+        view = View().add_item(HelpSelect(self.bot))
+        await ctx.send(embed=embed, view=view)
 
     @commands.hybrid_command(name="info", description="Shows the bot's info.")
     async def info(self, ctx: commands.Context):
