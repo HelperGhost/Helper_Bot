@@ -8,7 +8,8 @@ token = os.getenv("TOKEN")
 
 class Bot(commands.Bot):
     def __init__(self, intents: discord.Intents, **kwargs):
-        super().__init__(command_prefix=commands.when_mentioned_or("!"), intents=intents, **kwargs)
+        self.prefix = "h!"
+        super().__init__(command_prefix=commands.when_mentioned_or(self.prefix, self.prefix.upper()), intents=intents, **kwargs)
 
     async def setup_hook(self):
         for file in os.listdir("cogs"):
@@ -26,7 +27,6 @@ class Bot(commands.Bot):
         await self.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.watching, name="Your Mom S2!"))
         print(f"Logged on as {self.user}.")
         await self.tree.sync()
-
 
 intents = discord.Intents.all()
 bot = Bot(intents=intents)
