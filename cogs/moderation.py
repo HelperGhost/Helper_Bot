@@ -9,6 +9,7 @@ class Moderation(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.emoji = "⚒"
 
     @commands.hybrid_command(name="ban", description="Bans a user.")
     @commands.has_permissions(ban_members=True)

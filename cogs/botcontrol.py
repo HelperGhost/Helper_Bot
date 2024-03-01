@@ -6,6 +6,7 @@ class BotControl(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.emoji = "🤖"
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
