@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord
 
 class BotControl(commands.Cog):
-    """The BotControl Cog ig."""
+    """The BotControl Cog."""
 
     def __init__(self, bot):
         self.bot = bot

@@ -5,47 +5,71 @@ from typing import Optional
 from datetime import datetime
 
 class HelpSelect(Select):
+    BLACKLISTED_COG = ["BotControl"]
+
     def __init__(self, bot: commands.Bot):
         super().__init__(
-            placeholder="Choose a Cog.",
-            options=[
-                discord.SelectOption(
-                    label=cog_name, description=cog.__doc__
-                ) for cog_name, cog in bot.cogs.items() if cog.__cog_commands__ and cog_name not in ["BotControl"]
-            ]
+            placeholder="Select a category.",
+            options=self.generate_options(bot)
         )
+        
         self.bot = bot
 
-    async def on_timeout(self):
-        self.disable_all_items()
+    def generate_options(self, bot: commands.Bot):
+        options = []
+        for name, cog in bot.cogs.items():
+            if name in self.BLACKLISTED_COG:
+                continue
 
+            emoji = cog.emoji if hasattr(cog, "emoji") else None
+
+            option = discord.SelectOption(
+                label=name,
+                description=cog.__doc__,
+                value=name,
+                emoji=emoji
+            )
+            options.append(option)
+        return options
+    
     async def callback(self, interaction: discord.Interaction):
-        cog = self.bot.get_cog(self.values[0])
-        assert cog
-
-        commands_mixer = []
-
-        for i in cog.walk_commands():
-            if i.hidden:
-                continue
-            commands_mixer.append(i)
-        for i in cog.walk_app_commands():
-            if i.hidden:
-                continue
-            commands_mixer.append(i)
+        cog_name = self.values[0]
+        cog = self.bot.get_cog(cog_name)
 
         embed = discord.Embed(
-            title=f"{cog.__cog_name__} Commands",
-            description="\n".join(f"`{command.name}`: {command.description}" for command in commands_mixer),
+            title=f"{cog.qualified_name}",
+            description=cog.__doc__,
             color=0x1fe2f3
         )
+        embed.set_author(name=f"@{self.bot.user}", icon_url=self.bot.user.avatar)
+        embed.set_thumbnail(url=self.bot.user.avatar)
+        embed.set_footer(text=f"Requested by @{interaction.user.name}.", icon_url=interaction.user.avatar)
+
+        commands = self.get_commands(cog)
+
+        for cmd in commands:
+            embed.add_field(name=cmd.name, value=cmd.description, inline=False)
+
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
+    def get_commands(self, cog: commands.Cog):
+        commands = []
+        for cmd in cog.walk_commands():
+            if cmd.hidden:
+                continue
+            commands.append(cmd)
+        for cmd in cog.walk_app_commands():
+            if cmd.hidden:
+                continue
+            commands.append(cmd)
+        return commands
+
 class Utility(commands.Cog):
-    """The Utility Cog ig."""
+    """The Utility Cog."""
 
     def __init__(self, bot):
         self.bot = bot
+        self.emoji = "⚙"
 
     @commands.hybrid_command(name="help", description="Shows the help menu.")
     async def help(self, ctx: commands.Context, command: Optional[str]=None):
@@ -56,6 +80,7 @@ class Utility(commands.Cog):
         )
         embed.set_author(name=f"@{self.bot.user}", icon_url=self.bot.user.avatar)
         embed.set_thumbnail(url=self.bot.user.avatar)
+        embed.set_footer(text=f"Requested by @{ctx.author.name}.", icon_url=ctx.author.avatar)
         view = View().add_item(HelpSelect(self.bot))
         await ctx.send(embed=embed, view=view)
 

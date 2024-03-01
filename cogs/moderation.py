@@ -5,7 +5,7 @@ import asyncio
 import datetime
 
 class Moderation(commands.Cog):
-    """The Moderation Cog ig."""
+    """The Moderation Cog."""
 
     def __init__(self, bot):
         self.bot = bot
