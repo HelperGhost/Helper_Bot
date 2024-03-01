@@ -5,7 +5,7 @@ from typing import Optional
 from datetime import datetime
 
 class HelpSelect(Select):
-    BLACKLISTED_COG = ["BotControl"]
+    BLACKLISTED_COG = ["BotControl", "Server"]
 
     def __init__(self, bot: commands.Bot):
         super().__init__(
