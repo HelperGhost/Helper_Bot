@@ -427,6 +427,236 @@ class Logs(commands.Cog):
                 embed.add_field(name="After", value="None", inline=False)
             
             await channel.send(embed=embed)
+        
+        if before.afk_timeout != after.afk_timeout:
+            embed = discord.Embed(
+                title="AFK Timeout Changed!",
+                description="The AFK timeout has been changed.",
+                color=discord.Color.green(),
+                timestamp=datetime.datetime.utcnow()
+            )
+            embed.set_author(name=before.name, icon_url=icon)
+            embed.set_thumbnail(url=icon)
+            embed.add_field(name="Before", value=before.afk_timeout, inline=False)
+            embed.add_field(name="After", value=after.afk_timeout, inline=False)
+
+            await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_channel_create(self, channel):
+        collection = db["server_logs"]
+
+        data = collection.find_one({"_id": channel.guild.id})
+
+        if not data:
+            return
+        
+        channel = self.bot.get_channel(data["channel"])
+
+        if not channel:
+            return
+        
+        icon = channel.guild.icon
+
+        if not icon:
+            icon = None
+        
+        embed = discord.Embed(
+            title="Channel Created!",
+            description=f"Channel {channel.mention} has been created.",
+            color=discord.Color.blurple(),
+            timestamp=datetime.datetime.utcnow()
+        )
+        embed.set_author(name=channel.guild.name, icon_url=icon)
+        embed.set_thumbnail(url=icon)
+        embed.set_footer(text=f"ID: {channel.id}")
+
+        await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_channel_delete(self, channel):
+        collection = db["server_logs"]
+
+        data = collection.find_one({"_id": channel.guild.id})
+
+        if not data:
+            return
+        
+        channel = self.bot.get_channel(data["channel"])
+
+        if not channel:
+            return
+        
+        icon = channel.guild.icon
+
+        if not icon:
+            icon = None
+        
+        embed = discord.Embed(
+            title="Channel Deleted!",
+            description=f"Channel {channel.name} has been deleted.",
+            color=discord.Color.red(),
+            timestamp=datetime.datetime.utcnow()
+        )
+        embed.set_author(name=channel.guild.name, icon_url=icon)
+        embed.set_thumbnail(url=icon)
+
+        await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_channel_update(self, before, after):
+        collection = db["server_logs"]
+
+        data = collection.find_one({"_id": before.guild.id})
+
+        if not data:
+            return
+        
+        channel = self.bot.get_channel(data["channel"])
+
+        if not channel:
+            return
+        
+        icon = before.guild.icon
+
+        if not icon:
+            icon = None
+
+        if before.name != after.name:
+            embed = discord.Embed(
+                title="Channel Name Changed!",
+                description=f"Channel name has been changed.",
+                color=discord.Color.blue(),
+                timestamp=datetime.datetime.utcnow()
+            )
+            embed.set_author(name=before.guild.name, icon_url=icon)
+            embed.set_thumbnail(url=icon)
+            embed.add_field(name="Before", value=before.name, inline=False)
+            embed.add_field(name="After", value=after.name, inline=False)
+
+            await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_role_create(self, role):
+        collection = db["server_logs"]
+
+        data = collection.find_one({"_id": role.guild.id})
+
+        if not data:
+            return
+        
+        channel = self.bot.get_channel(data["channel"])
+
+        if not channel:
+            return
+        
+        icon = role.guild.icon
+
+        if not icon:
+            icon = None
+        
+        embed = discord.Embed(
+            title="Role Created!",
+            description=f"Role {role.mention} has been created.",
+            color=discord.Color.green(),
+            timestamp=datetime.datetime.utcnow()
+        )
+        embed.set_author(name=role.guild.name, icon_url=icon)
+        embed.set_thumbnail(url=icon)
+        embed.set_footer(text=f"ID: {role.id}")
+
+        await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_role_delete(self, role):
+        collection = db["server_logs"]
+
+        data = collection.find_one({"_id": role.guild.id})
+
+        if not data:
+            return
+        
+        channel = self.bot.get_channel(data["channel"])
+
+        if not channel:
+            return
+        
+        icon = role.guild.icon
+
+        if not icon:
+            icon = None
+
+        embed = discord.Embed(
+            title="Role Deleted!",
+            description=f"Role {role.name} has been deleted.",
+            color=discord.Color.red(),
+            timestamp=datetime.datetime.utcnow()
+        )
+        embed.set_author(name=role.guild.name, icon_url=icon)
+        embed.set_thumbnail(url=icon)
+
+        await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_invite_create(self, invite):
+        collection = db["misc_logs"]
+
+        data = collection.find_one({"_id": invite.guild.id})
+
+        if not data:
+            return
+        
+        channel = self.bot.get_channel(data["channel"])
+
+        if not channel:
+            return
+        
+        icon = invite.guild.icon
+
+        if not icon:
+            icon = None
+
+        embed = discord.Embed(
+            title="Invite Created!",
+            description=f"Invite {invite.url} has been created by {invite.inviter.mention}.",
+            color=discord.Color.green(),
+            timestamp=datetime.datetime.utcnow()
+        )
+        embed.set_author(name=invite.guild.name, icon_url=icon)
+        embed.set_thumbnail(url=icon)
+        embed.set_footer(text=f"Created by {invite.inviter.name}", icon_url=invite.inviter.avatar_url)
+
+        await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_invite_delete(self, invite):
+        collection = db["misc_logs"]
+
+        data = collection.find_one({"_id": invite.guild.id})
+
+        if not data:
+            return
+        
+        channel = self.bot.get_channel(data["channel"])
+
+        if not channel:
+            return
+        
+        icon = invite.guild.icon
+
+        if not icon:
+            icon = None
+
+        embed = discord.Embed(
+            title="Invite Deleted!",
+            description=f"Invite {invite.url} has been deleted.",
+            color=discord.Color.red(),
+            timestamp=datetime.datetime.utcnow()
+        )
+        embed.set_author(name=invite.guild.name, icon_url=icon)
+        embed.set_thumbnail(url=icon)
+
+        await channel.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Logs(bot))
