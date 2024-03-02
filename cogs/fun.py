@@ -1,89 +1,58 @@
+from discord.ext import commands
 import discord
-from discord.ext import bridge, commands
 import random
-import os
-import dotenv
-
-dotenv.load_dotenv()
-guild_id = int(os.getenv("GUILD_ID"))
+import asyncio
 
 class Fun(commands.Cog):
+    """The Fun Cog."""
+
     def __init__(self, bot):
         self.bot = bot
+        self.emoji = "🎮"
 
-    @bridge.bridge_command(guild_ids=[guild_id], name="gtn", description="Guess The Number game")
-    async def gtn(self, ctx):
-        # Code for Guess The Number game logic
+    @commands.hybrid_command(name="gtn", description="Guess The Number game")
+    async def gtn(self, ctx: commands.Context):
         num = random.randint(1, 100)
-        # Send intro message
-        await ctx.respond("I'm thinking of a number between 1 and 100. Try to guess it!")
-        # Keep track of number of guesses
+        await ctx.send("I'm thinking of a number between 1 and 100. Try to guess it!")
         guess_count = 0
-        # Accept guesses and give feedback
         while True:
-            guess = await self.bot.wait_for('message')
-            guess = int(guess.content)
-            guess_count += 1
-            if guess < num:
-                await ctx.respond("Too low!")
-            elif guess > num:
-                await ctx.respond("Too high!")
-            else:
-                await ctx.respond(f"You got it in {guess_count} guesses!")
+            try:
+                guess = await self.bot.wait_for("message", check=lambda message: message.author == ctx.author, timeout=30)
+                guess = int(guess.content)
+                guess_count += 1
+                if guess < num:
+                    await ctx.send("Too low!")
+                elif guess > num:
+                    await ctx.send("Too high!")
+                else:
+                    await ctx.send(f"You got it in {guess_count} guesses!")
+                    break
+            except asyncio.TimeoutError:
+                await ctx.send("You took a lot of time to reply.")
                 break
         
-    @bridge.bridge_command(name="roll", description="Rolls a dice")
-    async def roll(self, ctx):
-        # Code for dice rolling logic
+    @commands.hybrid_command(name="roll", description="Rolls a dice")
+    async def roll(self, ctx: commands.Context):
         sides = 6
         roll = random.randint(1, sides)
-        await ctx.respond(f"You rolled a {roll} on a D{sides} dice!")
+        await ctx.send(f"You rolled a {roll} on a D{sides} dice!")
 
-    @bridge.bridge_command(name="flip", description="Flips a coin")
-    async def flip(self, ctx):
-        # Code for coin flipping logic
+    @commands.hybrid_command(name="flip", description="Flips a coin")
+    async def flip(self, ctx: commands.Context):
         choices = ["Heads", "Tails"]
         flip = random.choice(choices)
-        await ctx.respond(f"You flipped a coin and got {flip}!")
+        await ctx.send(f"You flipped a coin and got {flip}!")
 
-    @bridge.bridge_command(guild_ids=[guild_id], name="rps", description="Play rock paper scissors")
-    async def rps(self, ctx, choice: discord.Option(str, "Your choice", choices=["Rock", "Paper", "Scissors"])):
-        # Code for rock paper scissors logic
-        choices = ["Rock", "Paper", "Scissors"]
-        bot_choice = random.choice(choices)
-
-        if choice == bot_choice:
-            result = "It's a tie!"
-        elif choice == "Rock":
-            if bot_choice == "Paper":
-                result = "You lose! Paper beats Rock"
-            else:
-                result = "You win! Rock beats Scissors"
-        elif choice == "Paper":
-            if bot_choice == "Scissors":
-                result = "You lose! Scissors beats Paper"
-            else:
-                result = "You win! Paper beats Rock"
-        elif choice == "Scissors":
-            if bot_choice == "Rock":
-                result = "You lose! Rock beats Scissors"
-            else:
-                result = "You win! Scissors beats Paper"
-
-        await ctx.respond(f"You chose {choice} and I chose {bot_choice}. {result}")
-
-    @bridge.bridge_command(name="compliment", description="Gives a random compliment")
-    async def compliment(self, ctx):
-        # Code for random compliment logic
+    @commands.hybrid_command(name="compliment", description="Gives a random compliment")
+    async def compliment(self, ctx: commands.Context):
         compliments = ["You're doing great!", "You look wonderful today.", "That was a really smart idea.", "I appreciate you.", "You have such a kind heart."]
         recipient = ctx.author.mention
         compliment = random.choice(compliments)
 
-        await ctx.respond(f"{recipient} {compliment}")
+        await ctx.send(f"{recipient} {compliment}")
 
-    @bridge.bridge_command(name="fortune", description="Get a fortune")
-    async def fortune(self, ctx):
-        # Code for fortune telling logic
+    @commands.hybrid_command(name="fortune", description="Get a fortune")
+    async def fortune(self, ctx: commands.Context):
         fortunes = ["A faithful friend is a strong defense.",
                     "A smooth sea never made a skillful mariner.",
                     "Adventure can be real happiness.",
@@ -91,11 +60,10 @@ class Fun(commands.Cog):
 
         fortune = random.choice(fortunes)
 
-        await ctx.respond(fortune)
+        await ctx.send(fortune)
 
-    @bridge.bridge_command(name="quote", description="Get an inspirational quote")
-    async def quote(self, ctx):
-        # Code for random inspirational quote
+    @commands.hybrid_command(name="quote", description="Get an inspirational quote")
+    async def quote(self, ctx: commands.Context):
         quotes = ["Stay hungry. Stay foolish.",
                   "Your time is limited, so don't waste it living someone else's life.",
                   "Good judgment comes from experience, and experience comes from bad judgment.",
@@ -103,10 +71,10 @@ class Fun(commands.Cog):
 
         quote = random.choice(quotes)
 
-        await ctx.respond(quote)
+        await ctx.send(quote)
 
-    @bridge.bridge_command(guild_ids=[guild_id], name="roast", description="Roast someone")
-    async def roast(self, ctx, user: discord.Member):
+    @commands.hybrid_command(name="roast", description="Roast someone")
+    async def roast(self, ctx: commands.Context, user: discord.Member):
         roasts = [
             f"Yo {user.mention}. I'm not saying you're ugly, but if I throw a stick, you fetch the b*stard and bring it back.",
             f"Hey {user.mention}. You act like how I would think vomit would act if it could.",
@@ -136,12 +104,12 @@ class Fun(commands.Cog):
         roast = random.choice(roasts)
 
         if user.id == 875208986603958344:
-            await ctx.respond("Hey you cant roast my friend.")
+            await ctx.send("Hey you cant roast my friend.")
         if user.id == 1155466619116601406 or user.id == 1196049834516414474:
-            await ctx.respond("Why should I roast myself?")
+            await ctx.send("Why should I roast myself?")
         else:
-            await ctx.respond(roast)
+            await ctx.send(roast)
 
-def setup(bot):
-    bot.add_cog(Fun(bot))
+async def setup(bot):
+    await bot.add_cog(Fun(bot))
     
