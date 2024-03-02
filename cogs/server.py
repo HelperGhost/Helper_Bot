@@ -59,7 +59,7 @@ class Server(commands.Cog):
         if not data:
             return
         
-        role = self.bot.get_role(data["role"])
+        role = member.guild.get_role(data["role"])
 
         if not role:
             return

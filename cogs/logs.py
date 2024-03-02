@@ -624,7 +624,7 @@ class Logs(commands.Cog):
         )
         embed.set_author(name=invite.guild.name, icon_url=icon)
         embed.set_thumbnail(url=icon)
-        embed.set_footer(text=f"Created by {invite.inviter.name}", icon_url=invite.inviter.avatar_url)
+        embed.set_footer(text=f"Created by {invite.inviter.name}")
 
         await channel.send(embed=embed)
 

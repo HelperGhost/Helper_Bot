@@ -18,7 +18,7 @@ class Configuration(commands.Cog):
         self.bot = bot
         self.emoji = "🔨"
 
-    @commands.hybrid_command(name="setwelcomer", description="Sets the welcomer channel.")
+    @commands.hybrid_command(name="welcomer", description="Sets the welcomer channel.")
     @commands.has_permissions(administrator=True)
     async def set_welcomer(self, ctx: commands.Context, channel: discord.TextChannel):
         collection = db["welcomer"]
