@@ -268,7 +268,7 @@ class Logs(commands.Cog):
             embed = discord.Embed(
                 title="Member Joined Voice Channel!",
                 description=f"{member.mention} joined the voice channel {after.channel.mention}",
-                color=0x00FF00,
+                color=discord.Color.blue(),
                 timestamp=datetime.datetime.utcnow()
             )
             embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
@@ -276,11 +276,11 @@ class Logs(commands.Cog):
 
             await channel.send(embed=embed)
 
-        elif before.channel and not after.channel:
+        if before.channel and not after.channel:
             embed = discord.Embed(
                 title="Member Left Voice Channel!",
                 description=f"{member.mention} left the voice channel {before.channel.mention}",
-                color=0xFF0000,
+                color=discord.Color.red(),
                 timestamp=datetime.datetime.utcnow()
             )
             embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
@@ -288,11 +288,11 @@ class Logs(commands.Cog):
 
             await channel.send(embed=embed)
 
-        elif before.channel and after.channel and before.channel != after.channel:
+        if before.channel and after.channel and before.channel != after.channel:
             embed = discord.Embed(
                 title="Member Moved Between Voice Channels!",
                 description=f"{member.mention} moved from {before.channel.mention} to {after.channel.mention}",
-                color=0x0000FF,
+                color=discord.Color.brand_green(),
                 timestamp=datetime.datetime.utcnow()
             )
             embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
@@ -300,17 +300,132 @@ class Logs(commands.Cog):
 
             await channel.send(embed=embed)
 
-        elif before.mute != after.mute or before.deaf != after.deaf:
+        if before.mute != after.mute:
             mute_status = "muted" if after.mute else "unmuted"
             embed = discord.Embed(
                 title="Member Mic Got Updated!",
                 description=f"{member.mention} was {mute_status}.",
-                color=0xFFFF00,
+                color=discord.Color.yellow(),
                 timestamp=datetime.datetime.utcnow()
             )
             embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
             embed.set_thumbnail(url=member.avatar)
 
+            await channel.send(embed=embed)
+
+        if before.deaf != after.deaf:
+            deaf_status = "deafened" if after.deaf else "undeafened"
+            embed = discord.Embed(
+                title="Member Speaker Got Updated!",
+                description=f"{member.mention} was {deaf_status}.",
+                color=discord.Color.dark_gold(),
+                timestamp=datetime.datetime.utcnow()
+            )
+            embed.set_author(name=f"@{member.name}", icon_url=member.avatar)
+            embed.set_thumbnail(url=member.avatar)
+
+            await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_update(self, before, after):
+        collection = db["server_logs"]
+
+        data = collection.find_one({"_id": before.id})
+
+        if not data:
+            return
+
+        channel = self.bot.get_channel(data["channel"])
+
+        if not channel:
+            return
+            
+        icon = after.icon
+    
+        if not icon:
+            icon = None
+        
+        if before.name != after.name:
+            embed = discord.Embed(
+                title="Server Name Changed!",
+                description=f"Server name changed from {before.name} to {after.name}.",
+                color=discord.Color.blue(),
+                timestamp=datetime.datetime.utcnow()
+            )
+            embed.set_author(name=before.name, icon_url=icon)
+            embed.set_thumbnail(url=before.icon)
+
+            await channel.send(embed=embed)
+
+        if before.icon != after.icon:
+            embed = discord.Embed(
+                title="Server Icon Changed!",
+                description="The server icon has been changed.",
+                color=discord.Color.blurple(),
+                timestamp=datetime.datetime.utcnow()
+            )
+            embed.set_author(name=before.name, icon_url=icon)
+            
+            if icon:
+                embed.set_image(url=icon)
+
+            await channel.send(embed=embed)
+
+        if before.banner != after.banner:
+            embed = discord.Embed(
+                title="Server Banner Changed!",
+                description="The server banner has been changed.",
+                color=discord.Color.blurple(),
+                timestamp=datetime.datetime.utcnow()
+            )
+
+            banner = after.banner
+
+            if not banner:
+                banner = None
+                embed.add_field(name="Banner", description="None", inline=False)
+            
+            embed.set_author(name=before.name, icon_url=icon)
+
+            if banner:
+                embed.set_image(url=banner)
+
+            await channel.send(embed=embed)
+
+        if before.description != after.description:
+            embed = discord.Embed(
+                title="Server Description Changed!",
+                description="The server description has been changed.",
+                color=discord.Color.gold(),
+                timestamp=datetime.datetime.utcnow()
+            )
+            embed.set_author(name=before.name, icon_url=icon)
+            embed.set_thumbnail(url=icon)
+            embed.add_field(name="Before", value=before.description, inline=False)
+            embed.add_field(name="After", value=after.description, inline=False)
+
+            await channel.send(embed=embed)
+
+        if before.afk_channel != after.afk_channel:
+            embed = discord.Embed(
+                title="AFK Channel Changed!",
+                description="The AFK channel has been changed.",
+                color=discord.Color.green(),
+                timestamp=datetime.datetime.utcnow()
+            )
+            embed.set_author(name=before.name, icon_url=icon)
+            embed.set_thumbnail(url=icon)
+
+            if before.afk_channel:
+                embed.add_field(name="Before", value=before.afk_channel.mention, inline=False)
+            else:
+                embed.add_field(name="Before", value="None", inline=False)
+
+            if after.afk_channel:
+                embed.add_field(name="After", value=after.afk_channel.mention, inline=False)
+            else:
+                embed.add_field(name="After", value="None", inline=False)
+            
             await channel.send(embed=embed)
 
 async def setup(bot):
