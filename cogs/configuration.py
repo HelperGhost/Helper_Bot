@@ -18,7 +18,7 @@ class Configuration(commands.Cog):
         self.bot = bot
         self.emoji = "🔨"
 
-    @commands.hybrid_command(name="setwelcomer", description="Sets the welcomer channel and role.")
+    @commands.hybrid_command(name="setwelcomer", description="Sets the welcomer channel.")
     @commands.has_permissions(administrator=True)
     async def set_welcomer(self, ctx: commands.Context, channel: discord.TextChannel):
         collection = db["welcomer"]
@@ -35,6 +35,25 @@ class Configuration(commands.Cog):
         embed = discord.Embed(
             title="Welcomer Set",
             description=f"The welcomer channel has been set to {channel.mention}.",
+            color=0x1fe2f3
+        )
+
+        await ctx.send(embed=embed)
+
+    @commands.hybrid_command(name="autorole", description="Sets the autorole.")
+    @commands.has_permissions(administrator=True)
+    async def autorole(self, ctx: commands.Context, role: discord.Role):
+        collection = db["autorole"]
+
+        collection.update_one(
+            {"_id": ctx.guild.id},
+            {"$set": {"role": role.id}},
+            upsert=True
+        )
+
+        embed = discord.Embed(
+            title="Autorole Set",
+            description=f"{role.mention} has been set as autorole.",
             color=0x1fe2f3
         )
 

@@ -50,6 +50,22 @@ class Server(commands.Cog):
         
         await channel.send(f"Welcome to the server, {member.mention}!", file=file)
 
+    @commands.Cog.listener()
+    async def on_member_join(self, member: discord.Member):
+        collection = db["autorole"]
+
+        data = collection.find_one({"_id": member.guild.id})
+
+        if not data:
+            return
+        
+        role = self.bot.get_role(data["role"])
+
+        if not role:
+            return
+        
+        await member.add_roles(role)
+
 async def setup(bot):
     await bot.add_cog(Server(bot))
     
