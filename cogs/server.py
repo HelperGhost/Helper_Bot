@@ -20,46 +20,49 @@ class Server(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        collection = db["welcomer"]
+        welcomer_collection = db["welcomer"]
 
-        data = collection.find_one({"_id": member.guild.id})
+        welcomer_data = welcomer_collection.find_one({"_id": member.guild.id})
 
-        if not data:
+        if not welcomer_data:
             return
         
-        channel = self.bot.get_channel(data["channel"])
+        channel = self.bot.get_channel(welcomer_data["channel"])
 
         if not channel:
             return
         
-        background = Editor("asset/welcomer_background.png")
+        background = Editor("asset/welcomer_background.jpg")
         profile_picture = await load_image_async(str(member.avatar.url))
 
-        profile = Editor(profile_picture).resize((150, 150)).circle_image()
-        text = Font.poppins(size=50, variant="bold")
-
+        profile = Editor(profile_picture).resize((125, 125)).circle_image()
+        text = Font.poppins(size=40, variant="bold")
         text_small = Font.poppins(size=20, variant="light")
 
-        background.paste(profile, (325, 90))
-        background.ellipse((355, 90), 150, 150, outline="white", stroke_width=5)
+        center_x = (background.image.width - profile.image.width) // 2
+        center_y = (background.image.height - profile.image.height) // 2 - 40
 
-        background.text((400, 260), f"Welcome {member.name}#{member.discriminator}", color="white", font=text, align="center")
-        background.text((400, 325), f"Have a good day in {member.guild.name}", color="white", font=text_small, align="center")
+        background.paste(profile, (center_x, center_y))
+        background.ellipse((center_x, center_y), 125, 125, outline="white", stroke_width=5)
+
+        text_x = background.image.width // 2
+        text_y = center_y + profile.image.height + 15
+
+        background.text((text_x, text_y), f"Welcome {member.name}#{member.discriminator}", color="white", font=text, align="center")
+        background.text((text_x, text_y + 65), f"Have a good day in {member.guild.name}", color="white", font=text_small, align="center")
 
         file = File(fp=background.image_bytes, filename="image.png")
         
         await channel.send(f"Welcome to the server, {member.mention}!", file=file)
 
-    @commands.Cog.listener()
-    async def on_member_join(self, member: discord.Member):
-        collection = db["autorole"]
+        autorole_collection = db["autorole"]
 
-        data = collection.find_one({"_id": member.guild.id})
+        autorole_data = autorole_collection.find_one({"_id": member.guild.id})
 
-        if not data:
+        if not autorole_data:
             return
         
-        role = member.guild.get_role(data["role"])
+        role = member.guild.get_role(autorole_data["role"])
 
         if not role:
             return
